@@ -1,0 +1,134 @@
+<title>The Gap App</title>
+<link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico"/>
+<link rel="stylesheet" media="screen" href="static/bootstrap.min.css">
+<link rel="stylesheet" href="static/bootstrap-theme.min.css">
+<link rel="stylesheet" type="text/css" href="static/default.css" />
+<link rel="stylesheet" type="text/css" href="static/component.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    main {
+        height: 180px;
+        width: 60%;
+        overflow: none;
+        margin: 0 auto;
+        margin-top: 60px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        resize: none;
+        overflow: none;
+        transform: scale(2);
+    }
+    .container {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        color: white;
+        width: 264px;
+        padding-top: 20px;
+        resize: none;
+        overflow: none;
+    }
+    body { 
+        background-color: #0B3B5D;
+        background-image: url('/static/mindthegap.png');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center center; 
+        background-size: contain;
+        overflow: hidden;
+    }
+    form{
+        width:50%; 
+        margin:0 auto;
+    }
+    .btn-resized {
+        font-size: 10px;
+        width: 100px;
+        padding: 5px;
+        margin-left: 20px;
+        margin-top: 0px;
+    }
+    .alert {
+        font-size: 8px;
+        padding-left: 8px;
+    }
+    label, input, textarea{
+        display: block; 
+    }
+    input, textarea{
+        width: 250px;
+        border: none;
+        border-radius: 15px;
+        outline: none;
+        padding: 5px;
+        color: #676767;
+        transition: border 0.5s;
+        -webkit-transition: border 0.5s;
+        -moz-transition: border 0.5s;
+        -o-transition: border 0.5s;
+        border: solid 2px #98d4f3;  
+        -webkit-box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        box-sizing:border-box;
+        margin-left: -58px;
+        margin-bottom: 10px;
+    }
+    input:focus, textarea:focus{
+        border: solid 2px #77bde0;  
+    }
+
+    textarea{
+        height: 100px;  
+        resize: none; 
+        overflow: auto;
+        margin-bottom: 20px;
+    }
+
+    :focus::-webkit-input-placeholder {
+        opacity: 0;
+        -webkit-transition: opacity 0.3s linear; 
+    }
+    ::-webkit-input-placeholder {
+       text-align: center;
+    }
+
+    :-moz-placeholder { /* Firefox 18- */
+        text-align: center;  
+    }
+
+    ::-moz-placeholder {  /* Firefox 19+ */
+        text-align: center;  
+    }
+
+    :-ms-input-placeholder {  
+        text-align: center; 
+    }
+    .instructions {
+        position: absolute;
+        bottom: -250px;
+        left: 140px;
+        width: 220px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 6px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+        padding: 5px;
+    }
+    a {
+        color: rgb(40, 176, 255);
+    }
+</style>
+<main>
+    <div class="container">
+        <form action="" method="post" role="form">
+            {{ form.csrf }}
+            <input type="text" class="form-control" id="name" name="name" placeholder="Paste Google Sheets URL Here">
+            <input type="text" class="form-control" id="email" name="email" placeholder="Email Address (optional)">
+            <button type="submit" class="btn btn-resized btn-1 btn-1a">Submit</button>
+        </form>
+    </div>
+    <div class="instructions">
+        <p>To use this tool<ol><li>Copy <a href="https://docs.google.com/spreadsheets/d/1sm_spcmOLZifyvjM8ERmrYTss8bxT8kw6hAAwp7eRxM/edit?usp=sharing">this</a> Google Sheets template</li><li>Fill in your data (do not change field names or possible values)</li><li>Make it publicly <a href="https://support.google.com/drive/answer/2494822">shareable</a> via a link</li><li>Paste the link above and hit submit</li></ol></p>
+    </div>
+</main>
