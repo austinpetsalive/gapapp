@@ -1,0 +1,181 @@
+<html>
+    <head>
+        <title>Gap App Dashboard</title>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+        <link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico"/>
+        <link rel="stylesheet" type="text/css" href="default.css" />
+        <link rel="stylesheet" type="text/css" href="static/default.css" />
+        <link rel="stylesheet" type="text/css" href="component.css" />
+        <link rel="stylesheet" type="text/css" href="static/component.css" />
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .grid-container {
+                display: grid;
+                grid-template-columns: 35% 15% 35% 15%;
+                grid-template-rows: 100px 10px 600px 220px 600px;
+                grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Content Content Plot ContentAnnotation" "Description Description Description DescriptionAnnotation" "Plot2 Plot2 Content2 ContentAnnotation2";
+            }
+
+            .Header { 
+                grid-area: Header; 
+                background-color: white;
+                font-family: 'Ubuntu', sans-serif;
+                font-weight: 600;
+                font-size: 60px;
+                color: black;
+                margin-top: 10px;
+                margin-left: 50px;
+            }
+
+            .Filler {
+                background-color: #0B3B5D;
+            }
+            
+            .Content { 
+                grid-area: Content; 
+                background-color: #F2F2F2;
+            }
+            
+            .contentvisual{
+                padding: 40px 40px 40px 40px;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+
+            .Description { 
+                grid-area: Description; 
+                background-color: #FFFFFF;
+            }
+
+            .Plot { 
+                grid-area: Plot; 
+                background-color: #97B7C9;
+            }
+
+            .DescriptionAnnotation { 
+                grid-area: DescriptionAnnotation; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .ContentAnnotation { 
+                grid-area: ContentAnnotation; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .Content2 { 
+                grid-area: Content2; 
+                background-color: #F2F2F2;
+            }
+
+            .Plot2 { 
+                grid-area: Plot2; 
+                background-color: #97B7C9;
+            }
+
+            .ContentAnnotation2 { 
+                grid-area: ContentAnnotation2; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .bubble {
+                width: 12%;
+                padding: 20px 20px 20px 20px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                margin-left: -10px;
+                position: absolute;
+                background-color: #333333;
+                color: white;
+                border-top-left-radius: 0.5em;
+                border-bottom-left-radius: 0.5em;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+            .bubblehead {
+                width: 120px;
+                text-align: center;
+                box-shadow: inset 1px 1px 1px rgba(0,0,0,.25);
+                padding: 0 1rem .15rem!important;
+                margin-bottom: 10px;
+                border-radius: 1em;
+                font: 700 var(--font-size-lg)/var(--line-height-md) var(--font-secondary);
+                text-transform: uppercase;
+                background: white;
+                color: black;
+                font-weight: 700;
+            }
+            .actiontext {
+                color: #E64B36;
+            }
+            .recommendationbubble {
+                width: 80%;
+                padding: 20px 20px 20px 20px;
+                background-color: #888888;
+                color: white;
+                border-radius: 0.5em;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+            .positive {
+                background-color: #228822;
+            }
+            .negative {
+                background-color: #882222;
+            }
+            .neutral {
+                background-color: #222288;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="grid-container">
+            <div class="Header">
+                <font color="#0081CB">Gap App</font> <font color="#E64B36">v0.1 Dashboard</font><a href="/">
+                <img src="/static/logo.png" width="80px" height="80px" style="float: right; margin-right: 10px;"></img></a>
+            </div>
+            <div class="Filler"></div><div class="Filler"></div><div class="Filler"></div><div class="Filler"></div>
+            
+            <div class="Content contentvisual">
+                <h2>Overall Outcomes</h2>
+                <p>First, we'll take a look at your overall outcomes. The plot on the right contains the outcome proportions. Red is bad, Orange may be ok depending on the transfer, and Blue and Green are good!</p>
+                <p>Although our mission is to save every single animal, we should always set intermediate goals and track our progress towards those goals. No Kill defines the target as 90% survival, but we think 95% or better is a great goal to aim for.</p>
+                <p>The following sections will help you break down these results so you can understand how to boost this number.</p>
+                <br><br><br>
+                {{recommendations.overall}}
+                <br>
+                Next, you can see how these outcomes are distributed over the time period in your data. Are there any patterns that might be useful?
+            </div>
+            <div class="ContentAnnotation">
+                <div class="bubble">
+                    <div class="bubblehead">Note</div>
+                    Did you know you can save this dashboard to your local computer?</br><hr>
+                    Press <span class="actiontext">CTRL+S</span> to save, and <span class="actiontext">CTRL+P</span> to print.
+                </div>
+            </div>
+            
+            <div class="Plot">{{plots.outcome_summary}}</div>
+
+            <div class="Description">{{plots.outcome_time_series}}</div>
+            <div class="DescriptionAnnotation">
+                <div class="bubble">
+                    <div class="bubblehead">Note</div>
+                    You can <span class="actiontext">click</span> and <span class="actiontext">drag</span> on these plots to zoom or crop the data if you would like to look at more specific time periods.
+                </div> 
+            </div>
+            
+            <div class="Content2 contentvisual">
+                <h2>Overall Population</h2>
+                <p>These are your overall population numbers.</p>
+                <p>It is often helpful to think about what segments of this population you are serving both as a proportion of your whole population and individually.</p>
+                <p>For instance, you may be serving moms and pups very well, but they may account for a relatively small proportion of your population; while large dogs may be less well served and make up a larger portion. This would indicate that a focus on large dog programs would be called for.</p>
+            </div>
+            <div class="ContentAnnotation2">
+                
+            </div>
+            
+            <div class="Plot2">{{plots.population_summary}}</div>
+        </div>
+    </body>
+</html>

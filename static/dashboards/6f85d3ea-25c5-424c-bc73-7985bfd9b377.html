@@ -1,0 +1,193 @@
+<html>
+    <head>
+        <title>Gap App Dashboard</title>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+        <link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico"/>
+        <link rel="stylesheet" type="text/css" href="default.css" />
+        <link rel="stylesheet" type="text/css" href="static/default.css" />
+        <link rel="stylesheet" type="text/css" href="component.css" />
+        <link rel="stylesheet" type="text/css" href="static/component.css" />
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .grid-container {
+                display: grid;
+                grid-template-columns: 35% 15% 35% 15%;
+                grid-template-rows: 100px 10px 600px 220px 600px;
+                grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Content Content Plot ContentAnnotation" "Description Description Description DescriptionAnnotation" "Plot2 Plot2 Content2 ContentAnnotation2";
+            }
+
+            .Header { 
+                grid-area: Header; 
+                background-color: white;
+                font-family: 'Ubuntu', sans-serif;
+                font-weight: 600;
+                font-size: 60px;
+                color: black;
+                margin-top: 10px;
+                margin-left: 50px;
+            }
+
+            .Filler {
+                background-color: #0B3B5D;
+            }
+            
+            .Content { 
+                grid-area: Content; 
+                background-color: #F2F2F2;
+            }
+            
+            .contentvisual{
+                padding: 40px 40px 40px 40px;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+
+            .Description { 
+                grid-area: Description; 
+                background-color: #FFFFFF;
+            }
+
+            .Plot { 
+                grid-area: Plot; 
+                background-color: #97B7C9;
+            }
+
+            .DescriptionAnnotation { 
+                grid-area: DescriptionAnnotation; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .ContentAnnotation { 
+                grid-area: ContentAnnotation; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .Content2 { 
+                grid-area: Content2; 
+                background-color: #F2F2F2;
+            }
+
+            .Plot2 { 
+                grid-area: Plot2; 
+                background-color: #97B7C9;
+            }
+
+            .ContentAnnotation2 { 
+                grid-area: ContentAnnotation2; 
+                background-color: #0B3B5D;
+                z-index: 10;
+            }
+
+            .bubble {
+                width: 12%;
+                padding: 20px 20px 20px 20px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                margin-left: -10px;
+                position: absolute;
+                background-color: #333333;
+                color: white;
+                border-top-left-radius: 0.5em;
+                border-bottom-left-radius: 0.5em;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+            .bubblehead {
+                width: 120px;
+                text-align: center;
+                box-shadow: inset 1px 1px 1px rgba(0,0,0,.25);
+                padding: 0 1rem .15rem!important;
+                margin-bottom: 10px;
+                border-radius: 1em;
+                font: 700 var(--font-size-lg)/var(--line-height-md) var(--font-secondary);
+                text-transform: uppercase;
+                background: white;
+                color: black;
+                font-weight: 700;
+            }
+            .actiontext {
+                color: #E64B36;
+            }
+            .recommendationbubble {
+                width: 80%;
+                padding: 20px 20px 20px 20px;
+                background-color: #888888;
+                color: white;
+                border-radius: 0.5em;
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            }
+            .positive {
+                background-color: #228822;
+            }
+            .negative {
+                background-color: #882222;
+            }
+            .neutral {
+                background-color: #222288;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="grid-container">
+            <div class="Header">
+                <font color="#0081CB">Gap App</font> <font color="#E64B36">v0.1 Dashboard</font><a href="/">
+                <img src="/static/logo.png" width="80px" height="80px" style="float: right; margin-right: 10px;"></img></a>
+            </div>
+            <div class="Filler"></div><div class="Filler"></div><div class="Filler"></div><div class="Filler"></div>
+            
+            <div class="Content contentvisual">
+                <h2>Overall Outcomes</h2>
+                <p>First, we'll take a look at your overall outcomes. The plot on the right contains the outcome proportions. Red is bad, Orange may be ok depending on the transfer, and Blue and Green are good!</p>
+                <p>Although our mission is to save every single animal, we should always set intermediate goals and track our progress towards those goals. No Kill defines the target as 90% survival, but we think 95% or better is a great goal to aim for.</p>
+                <p>The following sections will help you break down these results so you can understand how to boost this number.</p>
+                <br><br><br>
+                <div class='recommendationbubble negative'><div class="bubblehead">Needs Improvement</div>It looks like you might need some work on the number of animals that die. The next sections can help you narrow down the best way to address these animals!</div>
+                <br>
+                Next, you can see how these outcomes are distributed over the time period in your data. Are there any patterns that might be useful?
+            </div>
+            <div class="ContentAnnotation">
+                <div class="bubble">
+                    <div class="bubblehead">Note</div>
+                    Did you know you can save this dashboard to your local computer?</br><hr>
+                    Press <span class="actiontext">CTRL+S</span> to save, and <span class="actiontext">CTRL+P</span> to print.
+                </div>
+            </div>
+            
+            <div class="Plot"><div><div id="f935d0f4-fdd0-4002-a21c-2a1f06193ccb" style="height: 600px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("f935d0f4-fdd0-4002-a21c-2a1f06193ccb")) {
+    Plotly.newPlot("f935d0f4-fdd0-4002-a21c-2a1f06193ccb", [{"labels": ["Adoption", "Death", "Return to Owner", "Transfer"], "marker": {"colors": ["#9EC5AB", "#882222", "#32746D", "#104F55"], "line": {"color": "#000000", "width": 2}}, "name": "Outcomes Summary", "values": [17, 5, 4, 1], "type": "pie", "uid": "850dc1f5-1206-48aa-8bcd-86e539d9d792"}], {"autosize": true, "height": 600, "title": {"text": "Outcomes Summary"}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("f935d0f4-fdd0-4002-a21c-2a1f06193ccb")) {Plotly.Plots.resize(document.getElementById("f935d0f4-fdd0-4002-a21c-2a1f06193ccb"));};})</script></div></div>
+
+            <div class="Description"><div><div id="a1fc7e08-f210-46c3-9e57-159f2642d2d8" style="height: 200px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("a1fc7e08-f210-46c3-9e57-159f2642d2d8")) {
+    Plotly.newPlot("a1fc7e08-f210-46c3-9e57-159f2642d2d8", [{"marker": {"color": "#9EC5AB"}, "name": "Adoption", "x": ["2019-03-05", "2019-03-06", "2019-03-05", "2019-03-07", "2019-03-10", "2019-03-11", "2019-03-12", "2019-03-13", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "666e612a-90af-442a-ba31-4e475aaee180"}, {"marker": {"color": "#882222"}, "name": "Death", "x": ["2019-03-09", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "517fbb92-40a2-4f4d-ae33-db77e7533160"}, {"marker": {"color": "#32746D"}, "name": "Return To Owner", "x": ["2019-03-05", "2019-03-08", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "a322ad43-8c7c-423d-af91-1ebfdebd28c4"}, {"marker": {"color": "#104F55"}, "name": "Transfer", "x": ["2019-03-08"], "type": "histogram", "uid": "bbda0036-f5a8-4565-b587-24aef37a7563"}], {"autosize": true, "barmode": "stack", "height": 200, "margin": {"autoexpand": true, "b": 20, "l": 0, "pad": 0, "r": 0, "t": 0}, "title": {"text": "Outcomes Over Time"}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("a1fc7e08-f210-46c3-9e57-159f2642d2d8")) {Plotly.Plots.resize(document.getElementById("a1fc7e08-f210-46c3-9e57-159f2642d2d8"));};})</script></div></div>
+            <div class="DescriptionAnnotation">
+                <div class="bubble">
+                    <div class="bubblehead">Note</div>
+                    You can <span class="actiontext">click</span> and <span class="actiontext">drag</span> on these plots to zoom or crop the data if you would like to look at more specific time periods.
+                </div> 
+            </div>
+            
+            <div class="Content2 contentvisual">
+                <h2>Overall Population</h2>
+                <p>These are your overall population numbers.</p>
+                <p>It is often helpful to think about what segments of this population you are serving both as a proportion of your whole population and individually.</p>
+                <p>For instance, you may be serving moms and pups very well, but they may account for a relatively small proportion of your population; while large dogs may be less well served and make up a larger portion. This would indicate that a focus on large dog programs would be called for.</p>
+            </div>
+            <div class="ContentAnnotation2">
+                
+            </div>
+            
+            <div class="Plot2"><div><div id="1e8cc0d2-961a-4d27-b071-4976cee02e79" style="height: 600px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("1e8cc0d2-961a-4d27-b071-4976cee02e79")) {
+    Plotly.newPlot("1e8cc0d2-961a-4d27-b071-4976cee02e79", [{"x": ["Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Large (over 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)", "Small (under 30lbs for dogs)"], "type": "histogram", "uid": "2f3b850b-9980-4fde-9c03-d36b01b0bb70", "xaxis": "x", "yaxis": "y"}, {"colorscale": "Viridis", "x": ["Neonatal (less than 7 weeks)", "Nursing Mom", "Other Adult (over 16 weeks)", "Puppies/Kittens (7-16 weeks - inclusive)"], "y": ["Cat", "Dog"], "z": [[2, 1, 2, 2], [3, 1, 11, 5]], "type": "heatmap", "uid": "83b091a1-524c-46b0-9023-40afe1803160", "xaxis": "x2", "yaxis": "y2"}], {"annotations": [{"font": {"size": 16}, "showarrow": false, "text": "Adult Dog Sizes", "x": 0.225, "xanchor": "center", "xref": "paper", "y": 1.0, "yanchor": "bottom", "yref": "paper"}, {"font": {"size": 16}, "showarrow": false, "text": "Population Totals", "x": 0.775, "xanchor": "center", "xref": "paper", "y": 1.0, "yanchor": "bottom", "yref": "paper"}], "xaxis": {"anchor": "y", "domain": [0.0, 0.45]}, "yaxis": {"anchor": "x", "domain": [0.0, 1.0]}, "xaxis2": {"anchor": "y2", "domain": [0.55, 1.0]}, "yaxis2": {"anchor": "x2", "domain": [0.0, 1.0]}, "title": {"text": "Critical Population Numbers"}, "height": 600}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("1e8cc0d2-961a-4d27-b071-4976cee02e79")) {Plotly.Plots.resize(document.getElementById("1e8cc0d2-961a-4d27-b071-4976cee02e79"));};})</script></div></div>
+        </div>
+    </body>
+</html>

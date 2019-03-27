@@ -8,7 +8,7 @@ import pandas as pd
 import time
 import os
 
-from plotly_demo import simple_plotly_figure
+import content
 
 # App config.
 DEBUG = True
@@ -46,10 +46,21 @@ def hello():
     if form.validate():
         # Save the comment here.
         flash(data)
-        return redirect(simple_plotly_figure(df))
-        #return render_template()
+        return redirect(make_dash(df))
     
     return render_template('main.html', form=form)
  
+def make_dash(df):
+    local, server =content.get_dashboard_filenames()
+    with open('./static/dashboard.html', 'r') as fp:
+        dash = fp.read()
+    dash = dash.replace('{{plots.outcome_summary}}', content.outcome_summary(df, 600))
+    dash = dash.replace('{{recommendations.overall}}', content.overall_recommendation(df))
+    dash = dash.replace('{{plots.outcome_time_series}}', content.outcome_time_series(df, 200))
+    dash = dash.replace('{{plots.population_summary}}', content.population_summary(df, 600))
+    with open(local, 'w') as fp:
+        fp.write(dash)
+    return server
+
 if __name__ == "__main__":
     app.run(host='192.168.2.4', port=8080, debug=True)
