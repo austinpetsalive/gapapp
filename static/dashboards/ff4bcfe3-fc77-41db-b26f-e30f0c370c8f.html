@@ -12,24 +12,17 @@
         <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            @media print{
-                .annotation{
-                    visibility: hidden;
-                }
-            }
             .grid-container {
                 display: grid;
-                width: 1520px; 
-                margin: 0 auto;
                 /*grid-template-columns: 35% 15% 35% 15%;*/
-                grid-template-columns: 500px 260px 500px 260px;
+                grid-template-columns: 500px 250px 500px 250px;
                 grid-template-rows: 100px 10px 600px 220px 600px;
                 grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Content Content Plot ContentAnnotation" "Description Description Description DescriptionAnnotation" "Plot2 Plot2 Content2 ContentAnnotation2";
             }
 
             .Header { 
                 grid-area: Header; 
-                background-color: #DDDDDD;
+                background-color: white;
                 font-family: 'Julius Sans One', sans-serif;
                 font-weight: 600;
                 font-size: 60px;
@@ -41,7 +34,6 @@
                 font-family: 'Archivo Narrow', sans-serif;
             }
             body{
-                background-color: #DDDDDD;
                 font-family: 'Source Sans Pro', sans-serif;
             }
             .Filler {
@@ -72,9 +64,7 @@
                 background-color: #0B3B5D;
                 z-index: 10;
             }
-            .annotation{
 
-            }
             .ContentAnnotation { 
                 grid-area: ContentAnnotation; 
                 background-color: #0B3B5D;
@@ -158,10 +148,12 @@
                 <p>First, we'll take a look at your overall outcomes. The plot on the right contains the outcome proportions. Red is bad, Orange may be ok depending on the transfer, and Blue and Green are good!</p>
                 <p>Although our mission is to save every single animal, we should always set intermediate goals and track our progress towards those goals. No Kill defines the target as 90% survival, but we think 95% or better is a great goal to aim for.</p>
                 <p>The following sections will help you break down these results so you can understand how to boost this number.</p>
-                <p>{{recommendations.overall}}</p>
-                <p>Next, you can see how these outcomes are distributed over the time period in your data. Are there any patterns that might be useful?</p>
+                <br><br><br>
+                <div class='recommendationbubble negative'><div class="bubblehead">Needs Improvement</div>It looks like you might need some work on the number of animals that die. The next sections can help you narrow down the best way to address these animals!</div>
+                <br>
+                Next, you can see how these outcomes are distributed over the time period in your data. Are there any patterns that might be useful?
             </div>
-            <div class="ContentAnnotation annotation">
+            <div class="ContentAnnotation">
                 <div class="bubble">
                     <div class="bubblehead">Note</div>
                     Did you know you can save this dashboard to your local computer?</br><hr>
@@ -169,10 +161,18 @@
                 </div>
             </div>
             
-            <div class="Plot">{{plots.outcome_summary}}</div>
+            <div class="Plot"><div><div id="6f817cd5-d802-4953-b0e3-8d67bc895a82" style="height: 600px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("6f817cd5-d802-4953-b0e3-8d67bc895a82")) {
+    Plotly.newPlot("6f817cd5-d802-4953-b0e3-8d67bc895a82", [{"labels": ["Adoption", "Death/Euthanized", "Return to Owner", "Transfer Out"], "marker": {"colors": ["#8EB5CC", "#963022", "#7094AA", "#537388"], "line": {"color": "#000000", "width": 2}}, "name": "Outcomes Summary", "values": [17, 5, 4, 1], "type": "pie", "uid": "a5f22a62-0cbd-4b8a-980d-3a347bf7fe49"}], {"autosize": true, "font": {"family": "Source Sans Pro, sans-serif"}, "height": 600, "title": {"text": "Outcomes Summary"}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("6f817cd5-d802-4953-b0e3-8d67bc895a82")) {Plotly.Plots.resize(document.getElementById("6f817cd5-d802-4953-b0e3-8d67bc895a82"));};})</script></div></div>
 
-            <div class="Description">{{plots.outcome_time_series}}</div>
-            <div class="DescriptionAnnotation annotation">
+            <div class="Description"><div><div id="97e3b71f-d985-4940-a3ca-380ffa6d1055" style="height: 200px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("97e3b71f-d985-4940-a3ca-380ffa6d1055")) {
+    Plotly.newPlot("97e3b71f-d985-4940-a3ca-380ffa6d1055", [{"marker": {"color": "#8EB5CC"}, "name": "Adoption", "x": ["2019-03-05", "2019-03-06", "2019-03-05", "2019-03-07", "2019-03-10", "2019-03-11", "2019-03-12", "2019-03-13", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "72c55aa2-08b8-4a82-bf91-8f5c68c5b8c9"}, {"marker": {"color": "#963022"}, "name": "Death/Euthanized", "x": ["2019-03-09", "2019-03-14", "2019-03-14", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "13852bc7-b197-4c80-88d3-c24a82fa3998"}, {"marker": {"color": "#7094AA"}, "name": "Return To Owner", "x": ["2019-03-05", "2019-03-08", "2019-03-14", "2019-03-14"], "type": "histogram", "uid": "608987a5-e17a-4baa-8726-37d9ad081098"}, {"marker": {"color": "#537388"}, "name": "Transfer Out", "x": ["2019-03-08"], "type": "histogram", "uid": "a04ae290-38d5-4a56-85d6-c7583ddd6d85"}], {"autosize": true, "barmode": "stack", "font": {"family": "Source Sans Pro, sans-serif"}, "height": 200, "margin": {"autoexpand": true, "b": 20, "l": 0, "pad": 0, "r": 0, "t": 0}, "title": {"text": "Outcomes Over Time"}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("97e3b71f-d985-4940-a3ca-380ffa6d1055")) {Plotly.Plots.resize(document.getElementById("97e3b71f-d985-4940-a3ca-380ffa6d1055"));};})</script></div></div>
+            <div class="DescriptionAnnotation">
                 <div class="bubble">
                     <div class="bubblehead">Note</div>
                     You can <span class="actiontext">click</span> and <span class="actiontext">drag</span> on these plots to zoom or crop the data if you would like to look at more specific time periods.
@@ -185,11 +185,15 @@
                 <p>It is often helpful to think about what segments of this population you are serving both as a proportion of your whole population and individually.</p>
                 <p>For instance, you may be serving moms and pups very well, but they may account for a relatively small proportion of your population; while large dogs may be less well served and make up a larger portion. This would indicate that a focus on large dog programs would be called for.</p>
             </div>
-            <div class="ContentAnnotation2 annotation">
+            <div class="ContentAnnotation2">
                 
             </div>
             
-            <div class="Plot2">{{plots.population_summary}}</div>
+            <div class="Plot2"><div><div id="251afe1c-55d1-4c4d-aa6c-495d737a6b35" style="height: 600px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";
+if (document.getElementById("251afe1c-55d1-4c4d-aa6c-495d737a6b35")) {
+    Plotly.newPlot("251afe1c-55d1-4c4d-aa6c-495d737a6b35", [{"marker": {"color": "#8EB5CC"}, "x": ["Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Large (over 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)", "Small (under 35lbs for dogs)"], "type": "histogram", "uid": "ebff43ac-fbdd-4184-9dda-7e65f3383346", "xaxis": "x", "yaxis": "y"}, {"colorscale": [[0.0, "#8EB5CC"], [0.1, "#96AABD"], [0.2, "#9F9FAE"], [0.30000000000000004, "#A8959F"], [0.4, "#B18A90"], [0.5, "#BA8081"], [0.6000000000000001, "#C27572"], [0.7000000000000001, "#CB6A63"], [0.8, "#D46054"], [0.9, "#DD5545"], [1.0, "#E64B36"]], "x": ["Adult (6 months to 12 years)", "Neonatal (less than 6 weeks)", "Puppies/Kittens (6 weeks to 6 months)", "Senior (12 years and older)"], "y": ["Cat", "Dog"], "z": [[2.0, 2.0, 2.0, 1.0], [11.0, 4.0, 5.0, 0.0]], "type": "heatmap", "uid": "467dbed3-6340-43fb-9bb7-c8eb1866168d", "xaxis": "x2", "yaxis": "y2"}], {"annotations": [{"font": {"size": 16}, "showarrow": false, "text": "Adult Dog Sizes", "x": 0.225, "xanchor": "center", "xref": "paper", "y": 1.0, "yanchor": "bottom", "yref": "paper"}, {"font": {"size": 16}, "showarrow": false, "text": "Population Totals", "x": 0.775, "xanchor": "center", "xref": "paper", "y": 1.0, "yanchor": "bottom", "yref": "paper"}], "xaxis": {"anchor": "y", "domain": [0.0, 0.45]}, "yaxis": {"anchor": "x", "domain": [0.0, 1.0]}, "xaxis2": {"anchor": "y2", "domain": [0.55, 1.0]}, "yaxis2": {"anchor": "x2", "domain": [0.0, 1.0]}, "title": {"text": "Critical Population Numbers"}, "height": 600}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"}); 
+}
+</script><script type="text/javascript">window.addEventListener("resize", function(){if (document.getElementById("251afe1c-55d1-4c4d-aa6c-495d737a6b35")) {Plotly.Plots.resize(document.getElementById("251afe1c-55d1-4c4d-aa6c-495d737a6b35"));};})</script></div></div>
         </div>
     </body>
 </html>

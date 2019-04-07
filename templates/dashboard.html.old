@@ -4,9 +4,11 @@
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
         <link rel="stylesheet" media="screen" href="bootstrap.min.css">
         <link rel="stylesheet" href="bootstrap-theme.min.css">
+        <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Archivo+Narrow" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="default.css" />
-        <link rel="stylesheet" type="text/css" href="component.css" />
-        <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="component.css" />=
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             .grid-container {
@@ -19,14 +21,19 @@
             .Header { 
                 grid-area: Header; 
                 background-color: white;
-                font-family: 'Ubuntu', sans-serif;
+                font-family: 'Julius Sans One', sans-serif;
                 font-weight: 600;
                 font-size: 60px;
                 color: black;
                 margin-top: 10px;
                 margin-left: 50px;
             }
-
+            .subheader{
+                font-family: 'Archivo Narrow', sans-serif;
+            }
+            body{
+                font-family: 'Source Sans Pro', sans-serif;
+            }
             .Filler {
                 background-color: #0B3B5D;
             }
