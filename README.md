@@ -5,4 +5,4 @@ This is a flask server which takes a spreadsheet (populated from a template I pr
 
 ![](https://github.com/austinpetsalive/gapapp/raw/master/demo.png)
 
-![](https://github.com/austinpetsalive/gapapp/raw/master/Annotation%202019-03-27%20160820.png)
+![](https://github.com/austinpetsalive/gapapp/raw/master/data.png)
