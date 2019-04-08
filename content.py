@@ -5,6 +5,7 @@ from plotly import tools
 from itertools import product
 import numpy as np
 import pandas as pd
+from colour import Color
 
 from uuid import uuid4
 
@@ -24,8 +25,14 @@ def get_outcome_color(outcome_label):
             'lost/stolen': BLUE_SPECUTRUM[9],
             'death/euthanized': '#963022', 
             'owner requested euthanasia': '#842a1e'}[outcome_label.lower()]
+
 def get_font():
     return dict(family='Source Sans Pro, sans-serif')
+
+def get_outcome_recommendation():
+    return [.05, 0, 0, .30, .20, .45]
+
+desaturate_color = lambda c, percent: Color(hsl=np.array(Color(c).hsl) * np.array([1., percent, 1.])).hex
 
 def resort_outcomes(labels, values):
     order = ['death/euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
@@ -37,6 +44,9 @@ def resort_outcomes(labels, values):
             idx = lower_labels.index(o)
             new_labels.append(labels[idx])
             new_values.append(values[idx])
+        else:
+            new_labels.append(o.title())
+            new_values.append(0)
     return new_labels, new_values
 
 def outcome_summary(df, expected_height):
@@ -44,8 +54,15 @@ def outcome_summary(df, expected_height):
     values = list(df['Outcome'].value_counts())
     labels, values = resort_outcomes(labels, values)
     colors = [get_outcome_color(outcome) for outcome in labels]
-    trace = go.Pie(labels=labels, values=values, name="Outcomes Summary", marker=dict(colors=colors, line=dict(color='#000000', width=2)), sort=False)
-    data = [trace]
+    faded_colors = [desaturate_color(c, 0.5) for c in colors]
+    trace = go.Pie(labels=labels, values=values, 
+                   name="Your Values", marker=dict(colors=colors, line=dict(color='#000000', width=2)), 
+                   sort=False, hole=0.7)
+    trace_target = go.Pie(labels=labels, values=np.array(get_outcome_recommendation()) * np.sum(values), 
+                          name="Target", marker=dict(colors=faded_colors, line=dict(color='#000000', width=2)), 
+                          sort=False, hole=0.5, textinfo='none', hoverinfo='label+percent+name')
+
+    data = [trace_target, trace]
     layout = go.Layout(
         title='Outcomes Summary',
         autosize=True,
@@ -102,6 +119,22 @@ def overall_recommendation(df):
     if outcome_counts['Death/Euthanized']/total < 0.5:
         return recommendation_bubble('Great Job! You\'re saving more than 95%! It is often incredibly difficult to figure out how to save those last 5%, but see below to dig into that population and what you might be able to do for them.', 'positive')
 
+def housing_recommendation(df):
+    single_ratio = 1.0/25.0
+    co_ratio = 1.0/40.0
+    intake = pd.to_datetime(df['Intake Date'])
+    min_date = min(intake)
+    max_date = max(intake)
+    days = float((max_date - min_date).days)
+    year_proportion = 365.25/days
+    single_housing = (df['Housing Need'] == 'Single Unit Housing').count()
+    single_housing_extrap = single_housing * year_proportion
+    co_housing = (df['Housing Need'] == 'Co-Housing').count()
+    co_housing_extrap = co_housing * year_proportion
+    
+    recommendation = int(np.ceil(single_housing_extrap*single_ratio + co_housing_extrap*co_ratio))
+    return recommendation_bubble('Housing Recommendation', 'Based on the {0} days of data, {1} single housed, and {2} co-housed animals, we recommend you have {3} kennels at a minimum.'.format(days, single_housing, co_housing, recommendation), 'neutral')
+
 def html_table(lol):
     html = ""
     html += '<table class="table striped">'
@@ -115,8 +148,21 @@ def html_table(lol):
 def get_outcomes_table(df):
     labels = list(df['Outcome'].value_counts().keys())
     values = list(df['Outcome'].value_counts())
+    labels, values = resort_outcomes(labels, values)
+    rec = get_outcome_recommendation()
+    display_percents = ['{0}%'.format(int(x)) for x in np.round(np.array(rec)*100)]
+    display_estimates = np.round(np.array(rec)*np.sum(values)).astype(int)
+    deltas = [x-y for x, y in zip(values, display_estimates)]
+    display_deltas = []
+    for d in deltas:
+        if d > 0:
+            display_deltas.append('+{0}'.format(d))
+        else:
+            display_deltas.append('{0}'.format(d))
     #colors = [get_outcome_color(outcome) for outcome in labels]
-    return html_table(list(zip(labels, values)))
+    header = ['', 'Your Outcomes', 'Target %', 'Target #', 'Target Change']
+    rows = [header] + list(zip(labels, values, display_percents, display_estimates, display_deltas))
+    return html_table(rows)
 
 def get_population_table(df):
     vals = df.groupby('Species')['Group'].value_counts().sort_index()

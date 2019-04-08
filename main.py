@@ -64,6 +64,7 @@ def make_dash(df):
     dash = dash.replace('{{plots.population_outcomes_causes}}', content.population_outcomes_cause_graph(df, 600))
     dash = dash.replace('{{tables.population_outcomes_causes}}', content.population_outcomes_table(df))
     dash = dash.replace('{{tables.population_outcomes_causes_table}}', content.population_outcomes_causes_table(df))
+    dash = dash.replace('{{recommendations.housing}}', content.housing_recommendation(df))
     with open(local, 'w') as fp:
         fp.write(dash)
     return server
