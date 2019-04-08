@@ -27,23 +27,39 @@ def get_outcome_color(outcome_label):
 def get_font():
     return dict(family='Source Sans Pro, sans-serif')
 
+def resort_outcomes(labels, values):
+    order = ['death/euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
+    lower_labels = [l.lower() for l in labels]
+    new_labels = []
+    new_values = []
+    for o in order:
+        if o in lower_labels:
+            idx = lower_labels.index(o)
+            new_labels.append(labels[idx])
+            new_values.append(values[idx])
+    return new_labels, new_values
+
 def outcome_summary(df, expected_height):
     labels = list(df['Outcome'].value_counts().keys())
     values = list(df['Outcome'].value_counts())
+    labels, values = resort_outcomes(labels, values)
     colors = [get_outcome_color(outcome) for outcome in labels]
-    trace = go.Pie(labels=labels, values=values, name="Outcomes Summary", marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+    trace = go.Pie(labels=labels, values=values, name="Outcomes Summary", marker=dict(colors=colors, line=dict(color='#000000', width=2)), sort=False)
     data = [trace]
     layout = go.Layout(
         title='Outcomes Summary',
         autosize=True,
         height=expected_height,
-        font=get_font()
+        font=get_font(),
+        legend=dict(x=-0.5, y=1.1)
     )
     fig = go.Figure(data=data, layout=layout)
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
 def outcome_time_series(df, expected_height):
-    traces = [go.Histogram(x=df[df['Outcome']==outcome]['Intake Date'], name=outcome.title(), marker=dict(color=get_outcome_color(outcome))) for outcome in list(df['Outcome'].value_counts().keys())]
+    outcomes = list(df['Outcome'].value_counts().keys())
+    traces = [go.Histogram(x=df[df['Outcome']==outcome]['Intake Date'], name=outcome.title(), marker=dict(color=get_outcome_color(outcome))) for outcome in outcomes]
+    outcomes, traces = resort_outcomes(outcomes, traces)
     fig = go.Figure(data=traces, layout=go.Layout(barmode='stack', 
                                                   title="Outcomes Over Time", 
                                                   height=expected_height, 
@@ -71,6 +87,8 @@ def population_summary(df, expected_height):
     fig.append_trace(hist, 1, 1)
     fig.append_trace(heatmap, 1, 2)
     fig['layout'].update(title='Critical Population Numbers', height=expected_height)
+    fig['layout'].update(margin={'b': 150, 'r': 150})
+    fig['layout'].update(font=get_font())
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
 
@@ -83,3 +101,204 @@ def overall_recommendation(df):
         return recommendation_bubble('Doing Good!', 'You\'re saving 90%! Great work! It looks like you\'re not to 95% yet though, so let\'s dig into your population and see where we might be able to squeeze out that last little bit.', 'neutral')
     if outcome_counts['Death/Euthanized']/total < 0.5:
         return recommendation_bubble('Great Job! You\'re saving more than 95%! It is often incredibly difficult to figure out how to save those last 5%, but see below to dig into that population and what you might be able to do for them.', 'positive')
+
+def html_table(lol):
+    html = ""
+    html += '<table class="table striped">'
+    for sublist in lol:
+        html += '  <tr><td>'
+        html += '    </td><td>'.join([str(x) for x in sublist])
+        html += '  </td></tr>'
+    html += '</table>'
+    return html
+
+def get_outcomes_table(df):
+    labels = list(df['Outcome'].value_counts().keys())
+    values = list(df['Outcome'].value_counts())
+    #colors = [get_outcome_color(outcome) for outcome in labels]
+    return html_table(list(zip(labels, values)))
+
+def get_population_table(df):
+    vals = df.groupby('Species')['Group'].value_counts().sort_index()
+    row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
+    z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
+        pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
+        on=['Species', 'Group'],
+        how='right').fillna(value=0)['count']).reshape(2, 4).astype(int)
+    rows = []
+    rows.append([''] + col_labels)
+    for label, zz in zip(row_labels, z):
+        rows.append([label] + list(zz))
+    return html_table(rows)
+
+def get_pop_breakdown(df):
+    z = df.groupby(['Species', 'Group', 'Outcome']).size().to_frame('count').reset_index().merge(
+       pd.DataFrame(list(set([i for i in product(*[df.Outcome, df.Group, df.Species])])), columns=['Outcome', 'Group', 'Species']),
+       on=['Species', 'Group', 'Outcome'],
+       how='right').fillna(value=0)
+    z['GroupLabel'] = z['Species'] + ', ' + z['Group']
+    grps = z.groupby(['GroupLabel', 'Outcome'])['count']
+    stacks = {}
+    stacks_norm = {}
+    labels = []
+    for grp, val in grps:
+        if grp[1] not in labels:
+            labels.append(grp[1])
+        if grp[0] in stacks:
+            stacks[grp[0]].append(float(val))
+        else:
+            stacks[grp[0]] = [float(val)]
+    for key in stacks:
+        total = np.sum(stacks[key])
+        if total == 0:
+            stacks_norm[key] = [0 for _ in stacks[key]]
+        else:
+            stacks_norm[key] = [np.round(float(x)/float(total)*100, decimals=1) for x in stacks[key]]
+    for key in stacks:
+        _, stacks[key] = resort_outcomes(labels, stacks[key])
+    for key in stacks_norm:
+        _, stacks_norm[key] = resort_outcomes(labels, stacks_norm[key])
+    labels, _ = resort_outcomes(labels, list(range(len(labels))))
+    return labels, stacks, stacks_norm
+
+def population_outcomes_graph(df, expected_height):
+    labels, stacks, stacks_norm = get_pop_breakdown(df)
+    traces = []
+    traces_norm = []
+    for idx, label in enumerate(labels):
+        traces.append(go.Bar(x=list(stacks.keys()),
+                            y=np.transpose(list(stacks.values()))[idx],
+                            name=label,
+                            marker=dict(color=get_outcome_color(label))))
+        traces_norm.append(go.Bar(x=list(stacks_norm.keys()),
+                            y=np.transpose(list(stacks_norm.values()))[idx],
+                            name=label,
+                            marker=dict(color=get_outcome_color(label)), visible=False))
+    def getDataVisibile(norm=False):
+        if norm:
+            return [False for _ in traces] + [True for _ in traces_norm]
+        else:
+            return [True for _ in traces] + [False for _ in traces_norm]
+    layout = go.Layout(barmode='stack', title="Raw Outcomes by Group", margin={'b': 150}, height=expected_height)
+    fig = go.Figure(data=traces+traces_norm, layout=layout)
+    fig['layout'].update(font=get_font())
+    fig['layout'].update(updatemenus=list([
+                                        dict(
+                                            buttons=list([   
+                                                dict(label = 'Raw Numbers',
+                                                    method = 'update',
+                                                    args = [{'visible': getDataVisibile(False)},
+                                                            {'title': 'Raw Outcomes by Group'}]
+                                                ),
+                                                dict(label = 'Percentages',
+                                                    method = 'update', 
+                                                    args = [{'visible': getDataVisibile(True)},
+                                                            {'title': 'Percent Outcomes by Group'}]
+                                                ),                    
+                                            ]),
+                                            direction = 'left',
+                                            pad = {'r': 10, 't': 10},
+                                            showactive = True,
+                                            type = 'buttons',
+                                            x = 0.1,
+                                            xanchor = 'left',
+                                            y = 1.1,
+                                            yanchor = 'top' 
+                                        )
+                                    ]))
+    return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
+
+def population_outcomes_table(df):
+    labels, stacks, stacks_norm = get_pop_breakdown(df)
+    labels = [l.replace('/', '/ ') for l in labels]
+    rows = []
+    rows.append([''] + labels)
+    for key in stacks:
+        rows.append([key] + [int(x) for x in stacks[key]])
+    return '<div style="overflow: auto; height: 450px">' + html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
+
+def get_cod_breakdown(df):
+    z = df.groupby(['Cause of Death (if applicable)', 'Outcome']).size().to_frame('count').reset_index().merge(
+       pd.DataFrame(list(set([i for i in product(*[df['Outcome'], df['Cause of Death (if applicable)']])])), columns=['Outcome', 'Cause of Death (if applicable)']),
+       on=['Cause of Death (if applicable)', 'Outcome'],
+       how='right').fillna(value=0)
+    # z['GroupLabel'] = z['Species'] + ', ' + z['Group']
+    grps = z.groupby(['Cause of Death (if applicable)', 'Outcome'])['count']
+    stacks = {}
+    stacks_norm = {}
+    labels = []
+    for grp, val in grps:
+        if grp[1] not in labels:
+            labels.append(grp[1])
+        if grp[0] in stacks:
+            stacks[grp[0]].append(float(val))
+        else:
+            stacks[grp[0]] = [float(val)]
+    for key in stacks:
+        total = np.sum(stacks[key])
+        if total == 0:
+            stacks_norm[key] = [0 for _ in stacks[key]]
+        else:
+            stacks_norm[key] = [np.round(float(x)/float(total)*100, decimals=1) for x in stacks[key]]
+    for key in stacks:
+        _, stacks[key] = resort_outcomes(labels, stacks[key])
+    for key in stacks_norm:
+        _, stacks_norm[key] = resort_outcomes(labels, stacks_norm[key])
+    labels, _ = resort_outcomes(labels, list(range(len(labels))))
+    return labels, stacks, stacks_norm
+
+def population_outcomes_cause_graph(df, expected_height):
+    labels, stacks, stacks_norm = get_cod_breakdown(df)
+    traces = []
+    traces_norm = []
+    for idx, label in enumerate(labels):
+        traces.append(go.Bar(x=list(stacks.keys()),
+                            y=np.transpose(list(stacks.values()))[idx],
+                            name=label,
+                            marker=dict(color=get_outcome_color(label))))
+        traces_norm.append(go.Bar(x=list(stacks_norm.keys()),
+                            y=np.transpose(list(stacks_norm.values()))[idx],
+                            name=label,
+                            marker=dict(color=get_outcome_color(label)), visible=False))
+    def getDataVisibile(norm=False):
+        if norm:
+            return [False for _ in traces] + [True for _ in traces_norm]
+        else:
+            return [True for _ in traces] + [False for _ in traces_norm]
+    layout = go.Layout(barmode='stack', title="Raw Outcomes by Cause", margin={'b': 150}, height=expected_height)
+    fig = go.Figure(data=traces+traces_norm, layout=layout)
+    fig['layout'].update(font=get_font())
+    fig['layout'].update(updatemenus=list([
+                                        dict(
+                                            buttons=list([   
+                                                dict(label = 'Raw Numbers',
+                                                    method = 'update',
+                                                    args = [{'visible': getDataVisibile(False)},
+                                                            {'title': 'Raw Outcomes by Cause'}]
+                                                ),
+                                                dict(label = 'Percentages',
+                                                    method = 'update', 
+                                                    args = [{'visible': getDataVisibile(True)},
+                                                            {'title': 'Percent Outcomes by Cause'}]
+                                                ),                    
+                                            ]),
+                                            direction = 'left',
+                                            pad = {'r': 10, 't': 10},
+                                            showactive = True,
+                                            type = 'buttons',
+                                            x = 0.1,
+                                            xanchor = 'left',
+                                            y = 1.1,
+                                            yanchor = 'top' 
+                                        )
+                                    ]))
+    return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
+
+def population_outcomes_causes_table(df):
+    labels, stacks, stacks_norm = get_cod_breakdown(df)
+    labels = [l.replace('/', '/ ') for l in labels]
+    rows = []
+    rows.append([''] + labels)
+    for key in stacks:
+        rows.append([key] + [int(x) for x in stacks[key]])
+    return '<div style="overflow: auto; height: 450px">' + html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'

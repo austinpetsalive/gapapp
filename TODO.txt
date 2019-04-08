@@ -1,6 +1,4 @@
 -Plan out figure map
--Make simple nice html table outputs
--Add footer
 -Construct remaining chart todo list
 -Do remaining charts/descriptions/hints
 -Clean up repo

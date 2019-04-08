@@ -58,6 +58,12 @@ def make_dash(df):
     dash = dash.replace('{{recommendations.overall}}', content.overall_recommendation(df))
     dash = dash.replace('{{plots.outcome_time_series}}', content.outcome_time_series(df, 200))
     dash = dash.replace('{{plots.population_summary}}', content.population_summary(df, 600))
+    dash = dash.replace('{{tables.outcome_summary}}', content.get_outcomes_table(df))
+    dash = dash.replace('{{tables.population}}', content.get_population_table(df))
+    dash = dash.replace('{{plots.population_outcomes}}', content.population_outcomes_graph(df, 600))
+    dash = dash.replace('{{plots.population_outcomes_causes}}', content.population_outcomes_cause_graph(df, 600))
+    dash = dash.replace('{{tables.population_outcomes_causes}}', content.population_outcomes_table(df))
+    dash = dash.replace('{{tables.population_outcomes_causes_table}}', content.population_outcomes_causes_table(df))
     with open(local, 'w') as fp:
         fp.write(dash)
     return server
