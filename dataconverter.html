@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+.drag-div {
+    float: left;
+    width: 100px;
+    height: auto;
+    min-height: 50px;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid black;
+}
+.drag-div:empty::before {
+    color: grey;
+}
+.drag-div[data-placeholder]:not([data-placeholder=""]):empty::before {
+    content: attr(data-placeholder);
+}
+.drag-div:empty::before {
+    content: 'fallback placeholder';
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 200px auto 200px;
+    grid-template-areas: "Header Header" "InputVars OutputVars" "Footer Footer";
+}
+
+.Header { grid-area: Header; }
+
+.Header { grid-area: Header; }
+
+.InputVars { grid-area: InputVars; }
+
+.OutputVars { grid-area: OutputVars; }
+</style>
+<script>
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    if (ev.target.id.startsWith('drag')){
+        ev = ev.target.parentNode;
+        ev.appendChild(document.getElementById(data));
+    }
+    else{
+        ev.target.appendChild(document.getElementById(data));
+        ev = ev.target;
+    }
+}
+</script>
+</head>
+    <body>
+        <div class="grid-container">
+            <div class="Header">
+                <h2>Gap App Data Conversion Tool</h2>
+                <p>Drag your data's unique values onto the possible values in the data template. If nothing fits, don't drag it!</p>
+                <form>
+                    <button onclick="done();">Click Here When Done</button>
+                </form>
+            </div>
+            <div class="Header"></div>
+            <div class="InputVars drag-div">
+                <p draggable="true" ondragstart="drag(event)" id="drag1" width="88" height="31">Test 1</p>
+                <p draggable="true" ondragstart="drag(event)" id="drag2" width="88" height="31">Test 2</p>
+                <p draggable="true" ondragstart="drag(event)" id="drag3" width="88" height="31">Test 3</p>
+            </div>
+            <div class="OutputVars">
+                <div class='drag-div' id="drop1" ondrop="drop(event)" ondragover="allowDrop(event)" data-placeholder='data-placeholder'></div>
+                <div class='drag-div' id="drop2" ondrop="drop(event)" ondragover="allowDrop(event)" data-placeholder='data-placeholder'></div>
+                <div class='drag-div' id="drop3" ondrop="drop(event)" ondragover="allowDrop(event)" data-placeholder='data-placeholder'></div>
+                <div class='drag-div' id="drop4" ondrop="drop(event)" ondragover="allowDrop(event)" data-placeholder='data-placeholder'></div>
+                <div class='drag-div' id="drop5" ondrop="drop(event)" ondragover="allowDrop(event)" data-placeholder='data-placeholder'></div>
+            </div>
+            <div class="Footer"></div>
+            <div class="Footer"></div>
+        </div>
+    </body>
+</html>

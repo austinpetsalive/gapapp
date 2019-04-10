@@ -4,11 +4,14 @@ from sheets import get_sheet_data
 
 from flask import send_from_directory, redirect
 
+import logging
 import pandas as pd
 import time
 import os
 
 import content
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 # App config.
 DEBUG = True
@@ -54,17 +57,31 @@ def make_dash(df):
     local, server =content.get_dashboard_filenames()
     with open('./static/dashboard.html', 'r') as fp:
         dash = fp.read()
+    if len(df) > 100:
+        df = df.sample(n=100)
+    logging.info('{{plots.outcome_summary}}')
     dash = dash.replace('{{plots.outcome_summary}}', content.outcome_summary(df, 600))
+    logging.info('{{recommendations.overall}}')
     dash = dash.replace('{{recommendations.overall}}', content.overall_recommendation(df))
+    logging.info('{{plots.outcome_time_series}}')
     dash = dash.replace('{{plots.outcome_time_series}}', content.outcome_time_series(df, 200))
+    logging.info('{{plots.population_summary}}')
     dash = dash.replace('{{plots.population_summary}}', content.population_summary(df, 600))
+    logging.info('{{tables.outcome_summary}}')
     dash = dash.replace('{{tables.outcome_summary}}', content.get_outcomes_table(df))
+    logging.info('{{tables.population}}')
     dash = dash.replace('{{tables.population}}', content.get_population_table(df))
+    logging.info('{{plots.population_outcomes}}')
     dash = dash.replace('{{plots.population_outcomes}}', content.population_outcomes_graph(df, 600))
+    logging.info('{{plots.population_outcomes_causes}}')
     dash = dash.replace('{{plots.population_outcomes_causes}}', content.population_outcomes_cause_graph(df, 600))
+    logging.info('{{tables.population_outcomes_causes}}')
     dash = dash.replace('{{tables.population_outcomes_causes}}', content.population_outcomes_table(df))
+    logging.info('{{tables.population_outcomes_causes_table}}')
     dash = dash.replace('{{tables.population_outcomes_causes_table}}', content.population_outcomes_causes_table(df))
+    logging.info('{{recommendations.housing}}')
     dash = dash.replace('{{recommendations.housing}}', content.housing_recommendation(df))
+    logging.info('Done')
     with open(local, 'w') as fp:
         fp.write(dash)
     return server

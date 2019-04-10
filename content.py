@@ -75,8 +75,19 @@ def outcome_summary(df, expected_height):
 
 def outcome_time_series(df, expected_height):
     outcomes = list(df['Outcome'].value_counts().keys())
-    traces = [go.Histogram(x=df[df['Outcome']==outcome]['Intake Date'], name=outcome.title(), marker=dict(color=get_outcome_color(outcome))) for outcome in outcomes]
+    traces = []
+    for outcome in outcomes:
+        dat = df[df['Outcome']==outcome]['Intake Date']
+        if len(dat) > 0:
+            traces.append(go.Histogram(x=dat, name=outcome.title(), marker=dict(color=get_outcome_color(outcome))))
     outcomes, traces = resort_outcomes(outcomes, traces)
+    outcomes_no_zeros = []
+    traces_no_zeros = []
+    for o, t in zip(outcomes, traces):
+        if t != 0:
+            outcomes_no_zeros.append(o)
+            traces_no_zeros.append(t)
+    outcomes, traces = outcomes_no_zeros, traces_no_zeros
     fig = go.Figure(data=traces, layout=go.Layout(barmode='stack', 
                                                   title="Outcomes Over Time", 
                                                   height=expected_height, 
@@ -114,7 +125,7 @@ def overall_recommendation(df):
     total = len(df)
     if outcome_counts['Death/Euthanized']/total > 0.1:
         return recommendation_bubble('Needs Improvement', 'It looks like you might need some work on the number of animals that die. The next sections can help you narrow down the best way to address these animals!', 'negative')
-    if outcome_counts['Death/Euthanized']/total <= 0.1 and outcome_counts['Death']/total > 0.5:
+    if outcome_counts['Death/Euthanized']/total <= 0.1 and outcome_counts['Death/Euthanized']/total > 0.5:
         return recommendation_bubble('Doing Good!', 'You\'re saving 90%! Great work! It looks like you\'re not to 95% yet though, so let\'s dig into your population and see where we might be able to squeeze out that last little bit.', 'neutral')
     if outcome_counts['Death/Euthanized']/total < 0.5:
         return recommendation_bubble('Great Job! You\'re saving more than 95%! It is often incredibly difficult to figure out how to save those last 5%, but see below to dig into that population and what you might be able to do for them.', 'positive')

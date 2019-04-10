@@ -1,6 +1,18 @@
--Plan out figure map
--Construct remaining chart todo list
--Do remaining charts/descriptions/hints
--Clean up repo
--Make data conversion tool
--Test with actual data
+Died in Care to Outcome
+Cause of Death (if applicable) to Condition and/or Reason for Death
+Emergency (Trauma)
+Change did not die to "no condition"
+Change colors on population graph to grayscale
+Fix overall outcome recommendation bubble in other conditions
+Add tables to bottom for each population listing conditions
+Change "Cause" to condition everywhere
+Remove excess text at bottom of overall outcomes
+Add "All" "Cat" "Dog" and Ages (+ "All Ages") buttons to fascet "causes" plot
+Change note in "causes" section to say that the raw tables are below and the buttons change the population
+Abbreviate Population names (remove paretheses) to make tables fit
+Optimize queries for more data (up to 100k preferrably)
+Add "Note" about clicking the legend to change which categories are visible
+Make data conversion tutorial
+Regenerate APA data set with correct condition fields
+Pass test with all APA data
+Clean up repo
