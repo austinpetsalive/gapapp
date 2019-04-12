@@ -1,17 +1,19 @@
 from __future__ import print_function
-import pickle
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+import pickle
+
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+import logging
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
-
 def get_sheet_data(URL):
-
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
     """
@@ -49,10 +51,7 @@ def get_sheet_data(URL):
     values = result.get('values', [])
 
     if not values:
-        print('No data found.')
+        logging.info('No data found.')
     else:
-        print('Found data.')
+        logging.info('Found data.')
     return values
-
-if __name__ == '__main__':
-    get_sheet_data('https://docs.google.com/spreadsheets/d/1sm_spcmOLZifyvjM8ERmrYTss8bxT8kw6hAAwp7eRxM/edit#gid=0')
