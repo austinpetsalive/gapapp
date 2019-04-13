@@ -18,6 +18,7 @@ BLUE_ORANGE_SPECTRUM = ["#8EB5CC", "#96AABD", "#9F9FAE", "#A8959F", "#B18A90", "
 
 DEATH_COLOR = '#963022'
 OWNER_REQUEST_EUTHANASIA_COLOR = '#842a1e'
+DIED_IN_CARE_COLOR = '#de7b6e'
 
 def get_outcome_color(outcome_label):
     return {'adoption': BLUE_SPECUTRUM[0], 
@@ -25,12 +26,14 @@ def get_outcome_color(outcome_label):
             'transfer out': BLUE_SPECUTRUM[6], 
             'lost/stolen': BLUE_SPECUTRUM[9],
             'death/euthanized': DEATH_COLOR, 
-            'owner requested euthanasia': OWNER_REQUEST_EUTHANASIA_COLOR}[outcome_label.lower()]
+            'owner requested euthanasia': OWNER_REQUEST_EUTHANASIA_COLOR,
+            'died in care': DIED_IN_CARE_COLOR}[outcome_label.lower()]
 
 CONTENT_FONT_FAMILY = 'Source Sans Pro, sans-serif'
 
-OUTCOME_ORDER = ['death/euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
-OUTCOME_RECOMMENDATIONS = [.05, 0, 0, .30, .20, .45]
+OUTCOME_ORDER = ['died in care', 'death/euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
+OUTCOME_DEATH_INDICIES = [0, 1, 2]
+OUTCOME_RECOMMENDATIONS = [0, 0.05, 0, 0, .30, .20, .45]
 
 DASHBOARD_LOCAL_SAVE_PATH = './static/dashboards/'
 DASHBOARD_SERVER_SAVE_PATH = '/static/dashboards/'

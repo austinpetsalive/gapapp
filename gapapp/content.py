@@ -14,16 +14,6 @@ import gapapp.utils as utils
 import gapapp.configuration as cfg
 
 
-def run_query_function(query_func, df):
-    name = query_func.func_name
-    if name in QUERY_LUT:
-        return QUERY_LUT[name]
-    else:
-        result = query_func(df)
-        QUERY_LUT[name] = result
-        return result
-
-
 def get_outcomes_data(df):
     labels = list(df['Outcome'].value_counts().keys())
     values = list(df['Outcome'].value_counts())
@@ -32,8 +22,9 @@ def get_outcomes_data(df):
 
 def outcome_summary(df, expected_height):
     # Get data
-    labels, values = run_query_function(get_outcomes_data, df)
-
+    labels, values = get_outcomes_data(df)
+    print(labels)
+    print(values)
     # Get colors
     colors = [cfg.get_outcome_color(outcome) for outcome in labels]
     faded_colors = [utils.desaturate_color(c, 0.5) for c in colors]
@@ -62,26 +53,19 @@ def outcome_summary(df, expected_height):
 
 def outcome_time_series(df, expected_height):
     # Get data
-    labels, values = run_query_function(get_outcomes_data, df)
+    labels, _ = get_outcomes_data(df)
 
     outcomes = labels
     # Make time series histogram
     traces = []
     for outcome in outcomes:
         dat = df[df['Outcome']==outcome]['Intake Date']
-        if len(dat) > 0: #TODO: Fix issue with zero days not rendering properly
+        if len(dat) > 0:
             traces.append(go.Histogram(x=dat, name=outcome.title(), marker=dict(color=cfg.get_outcome_color(outcome))))
+        else:
+            traces.append(go.Histogram(x=[], name=outcome.title(), marker=dict(color=cfg.get_outcome_color(outcome))))
     # Sort outcomes in plot
     outcomes, traces = utils.resort_outcomes(outcomes, traces)
-
-    # TODO: Fix bug that makes this necessary
-    outcomes_no_zeros = []
-    traces_no_zeros = []
-    for o, t in zip(outcomes, traces):
-        if t != 0:
-            outcomes_no_zeros.append(o)
-            traces_no_zeros.append(t)
-    outcomes, traces = outcomes_no_zeros, traces_no_zeros
 
     # Define plot
     fig = go.Figure(data=traces, layout=go.Layout(barmode='stack', 
@@ -104,14 +88,14 @@ def get_population_data(df):
 
 def population_summary(df, expected_height):
     # Get data
-    row_labels, col_labels, z = run_query_function(get_population_data, df)
+    row_labels, col_labels, z = get_population_data(df)
 
     # Get colors
-    custom_colors = list(zip(np.linspace(0, 1, len(cfg.BLUE_ORANGE_SPECTRUM)),cfg.BLUE_ORANGE_SPECTRUM))
+    custom_colors = list(zip(np.linspace(0, 1, len(cfg.BLUE_SPECUTRUM)),cfg.BLUE_SPECUTRUM))
 
     # Define figures
-    heatmap = go.Heatmap(z=z, x=col_labels, y=row_labels, colorscale=custom_colors)#'Viridis')
-    hist = go.Histogram(x=df[df['Species'] == 'Dog']['Size'], marker=dict(color=cfg.BLUE_SPECUTRUM[0]))
+    heatmap = go.Heatmap(z=z, x=col_labels, y=row_labels, colorscale=custom_colors, reversescale=True, name="Population")#'Viridis')
+    hist = go.Histogram(x=df[df['Species'] == 'Dog']['Size'], marker=dict(color=cfg.BLUE_SPECUTRUM[0]), name="Population")
 
     # Create subplots and layout
     fig = tools.make_subplots(rows=1, cols=2, subplot_titles=('Adult Dog Sizes', 'Population Totals'))
@@ -125,20 +109,24 @@ def population_summary(df, expected_height):
 
 def overall_recommendation(df):
     # Get data
-    labels, values = run_query_function(get_outcomes_data, df)
+    _, values = get_outcomes_data(df)
     
     good_threshold = 0.1
     great_threshold = 0.05
+
     # Determine outcomes
-    outcome_counts = values
+    outcome_deaths = sum([values[i] for i in cfg.OUTCOME_DEATH_INDICIES])
     total = len(df)
-    #TODO: Make strings populate from threshold variables
-    if outcome_counts['Death/Euthanized']/total > good_threshold:
-        return utils.recommendation_bubble('Needs Improvement', 'It looks like you might need some work on the number of animals that die. The next sections can help you narrow down the best way to address these animals!', 'negative')
-    if outcome_counts['Death/Euthanized']/total <= good_threshold and outcome_counts['Death/Euthanized']/total > great_threshold:
-        return utils.recommendation_bubble('Doing Good!', 'You\'re saving 90%! Great work! It looks like you\'re not to 95% yet though, so let\'s dig into your population and see where we might be able to squeeze out that last little bit.', 'neutral')
-    if outcome_counts['Death/Euthanized']/total < great_threshold:
-        return utils.recommendation_bubble('Great Job! You\'re saving more than 95%! It is often incredibly difficult to figure out how to save those last 5%, but see below to dig into that population and what you might be able to do for them.', 'positive')
+    if total == 0:
+        return utils.recommendation_bubble('No Data Found', 'It looks like there wasn\'t any data found. Please report this as an error if it is not expected.', 'neutral')
+    outcome_death_rate = outcome_deaths/total
+    
+    if outcome_death_rate > good_threshold:
+        return utils.recommendation_bubble('Needs Improvement', 'Your save rate is {0:0.1f}%. In general, a good save rate is considered to be 90% or greater. The next sections can help you narrow down the best way to address these animals!'.format((1-outcome_death_rate)*100.0), 'negative')
+    if outcome_death_rate <= good_threshold and outcome_death_rate > great_threshold:
+        return utils.recommendation_bubble('Doing Good!', 'You\'re saving {0:0.1f}%! Great work! It looks like you\'re not to {1}% yet though, so let\'s dig into your population and see where we might be able to squeeze out that last little bit.'.format((1-outcome_death_rate)*100.0, int((1-great_threshold)*100)), 'neutral')
+    if outcome_death_rate < great_threshold:
+        return utils.recommendation_bubble('Great Job!', 'You\'re saving {1:0.1f}%! It is often incredibly difficult to figure out how to save those last {0}%, but see below to dig into that population and what you might be able to do for them.'.format(int(great_threshold*100), (1-outcome_death_rate)*100.0), 'positive')
 
 def housing_recommendation(df):
     single_ratio = 1.0/25.0
@@ -160,10 +148,11 @@ def get_outcomes_table(df):
     labels = list(df['Outcome'].value_counts().keys())
     values = list(df['Outcome'].value_counts())
     labels, values = utils.resort_outcomes(labels, values)
+    
     rec = cfg.OUTCOME_RECOMMENDATIONS
     display_percents = ['{0}%'.format(int(x)) for x in np.round(np.array(rec)*100)]
     display_estimates = np.round(np.array(rec)*np.sum(values)).astype(int)
-    deltas = [x-y for x, y in zip(values, display_estimates)]
+    deltas = [y-x for x, y in zip(values, display_estimates)]
     display_deltas = []
     for d in deltas:
         if d > 0:
@@ -178,6 +167,7 @@ def get_outcomes_table(df):
 def get_population_table(df):
     vals = df.groupby('Species')['Group'].value_counts().sort_index()
     row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
+    
     z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
         pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
         on=['Species', 'Group'],
@@ -220,6 +210,7 @@ def get_pop_breakdown(df):
 
 def population_outcomes_graph(df, expected_height):
     labels, stacks, stacks_norm = get_pop_breakdown(df)
+    
     traces = []
     traces_norm = []
     for idx, label in enumerate(labels):
@@ -271,16 +262,16 @@ def population_outcomes_table(df):
     rows = []
     rows.append([''] + labels)
     for key in stacks:
-        rows.append([key] + [int(x) for x in stacks[key]])
+        rows.append([key.split('(')[0]] + [int(x) for x in stacks[key]])
     return '<div style="overflow: auto; height: 450px">' + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
 
 def get_cod_breakdown(df):
-    z = df.groupby(['Cause of Death (if applicable)', 'Outcome']).size().to_frame('count').reset_index().merge(
-       pd.DataFrame(list(set([i for i in product(*[df['Outcome'], df['Cause of Death (if applicable)']])])), columns=['Outcome', 'Cause of Death (if applicable)']),
-       on=['Cause of Death (if applicable)', 'Outcome'],
+    z = df.groupby(['Condition and/or Reason for Death', 'Outcome']).size().to_frame('count').reset_index().merge(
+       pd.DataFrame(list(set([i for i in product(*[df['Outcome'], df['Condition and/or Reason for Death']])])), columns=['Outcome', 'Condition and/or Reason for Death']),
+       on=['Condition and/or Reason for Death', 'Outcome'],
        how='right').fillna(value=0)
     # z['GroupLabel'] = z['Species'] + ', ' + z['Group']
-    grps = z.groupby(['Cause of Death (if applicable)', 'Outcome'])['count']
+    grps = z.groupby(['Condition and/or Reason for Death', 'Outcome'])['count']
     stacks = {}
     stacks_norm = {}
     labels = []
@@ -304,16 +295,16 @@ def get_cod_breakdown(df):
     labels, _ = utils.resort_outcomes(labels, list(range(len(labels))))
     return labels, stacks, stacks_norm
 
-def population_outcomes_cause_graph(df, expected_height):
+def population_outcomes_condition_graph(df, expected_height):
     labels, stacks, stacks_norm = get_cod_breakdown(df)
     traces = []
     traces_norm = []
     for idx, label in enumerate(labels):
-        traces.append(go.Bar(x=list(stacks.keys()),
+        traces.append(go.Bar(x=[l.split('(')[0] for l in list(stacks.keys())],
                             y=np.transpose(list(stacks.values()))[idx],
                             name=label,
                             marker=dict(color=cfg.get_outcome_color(label))))
-        traces_norm.append(go.Bar(x=list(stacks_norm.keys()),
+        traces_norm.append(go.Bar(x=[l.split('(')[0] for l in list(stacks_norm.keys())],
                             y=np.transpose(list(stacks_norm.values()))[idx],
                             name=label,
                             marker=dict(color=cfg.get_outcome_color(label)), visible=False))
@@ -322,7 +313,7 @@ def population_outcomes_cause_graph(df, expected_height):
             return [False for _ in traces] + [True for _ in traces_norm]
         else:
             return [True for _ in traces] + [False for _ in traces_norm]
-    layout = go.Layout(barmode='stack', title="Raw Outcomes by Cause", margin={'b': 150}, height=expected_height)
+    layout = go.Layout(barmode='stack', title="Raw Outcomes by Condition", margin={'b': 150}, height=expected_height)
     fig = go.Figure(data=traces+traces_norm, layout=layout)
     fig['layout'].update(font=dict(family=cfg.CONTENT_FONT_FAMILY))
     fig['layout'].update(updatemenus=list([
@@ -331,12 +322,12 @@ def population_outcomes_cause_graph(df, expected_height):
                                                 dict(label = 'Raw Numbers',
                                                     method = 'update',
                                                     args = [{'visible': getDataVisibile(False)},
-                                                            {'title': 'Raw Outcomes by Cause'}]
+                                                            {'title': 'Raw Outcomes by Condition'}]
                                                 ),
                                                 dict(label = 'Percentages',
                                                     method = 'update', 
                                                     args = [{'visible': getDataVisibile(True)},
-                                                            {'title': 'Percent Outcomes by Cause'}]
+                                                            {'title': 'Percent Outcomes by Condition'}]
                                                 ),                    
                                             ]),
                                             direction = 'left',
@@ -351,30 +342,25 @@ def population_outcomes_cause_graph(df, expected_height):
                                     ]))
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
-def population_outcomes_causes_table(df):
+def population_outcomes_conditions_table(df):
     labels, stacks, _ = get_cod_breakdown(df)
     labels = [l.replace('/', '/ ') for l in labels]
     rows = []
     rows.append([''] + labels)
     for key in stacks:
-        rows.append([key] + [int(x) for x in stacks[key]])
+        rows.append([key.split('(')[0]] + [int(x) for x in stacks[key]])
     return '<div style="overflow: auto; height: 450px">' + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
 
 CONTENT_LUT = {
-    '{{plots.outcome_summary}}': [outcome_summary, 600],
+    '{{plots.outcome_summary}}': [outcome_summary, 650],
     '{{recommendations.overall}}': [overall_recommendation, None],
     '{{plots.outcome_time_series}}': [outcome_time_series, 200],
     '{{plots.population_summary}}': [population_summary, 600],
     '{{tables.outcome_summary}}': [get_outcomes_table, None],
     '{{tables.population}}': [get_population_table, None],
     '{{plots.population_outcomes}}': [population_outcomes_graph, 600],
-    '{{plots.population_outcomes_causes}}': [population_outcomes_cause_graph, 600],
-    '{{tables.population_outcomes_causes}}': [population_outcomes_table, None],
-    '{{tables.population_outcomes_causes_table}}': [population_outcomes_causes_table, None],
+    '{{plots.population_outcomes_conditions}}': [population_outcomes_condition_graph, 600],
+    '{{tables.population_outcomes_conditions}}': [population_outcomes_table, None],
+    '{{tables.population_outcomes_conditions_table}}': [population_outcomes_conditions_table, None],
     '{{recommendations.housing}}': [housing_recommendation, None],
-}
-
-
-QUERY_LUT = {
-
 }
