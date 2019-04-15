@@ -1,9 +1,5 @@
 New Features/Major Changes
 = Redo front page visuals
-= Add tables to bottom for each population listing conditions
-= Add "All" "Cat" "Dog" and Ages (+ "All Ages") buttons to fascet "causes" plot
-= Change note in "causes" section to say that the raw tables are below and the buttons change the population
-= Add "Note" about clicking the legend to change which categories are visible
 
 Optimizations
 = Optimize queries for more data (up to 100k preferrably)

@@ -23,8 +23,7 @@ def get_outcomes_data(df):
 def outcome_summary(df, expected_height):
     # Get data
     labels, values = get_outcomes_data(df)
-    print(labels)
-    print(values)
+
     # Get colors
     colors = [cfg.get_outcome_color(outcome) for outcome in labels]
     faded_colors = [utils.desaturate_color(c, 0.5) for c in colors]
@@ -76,7 +75,6 @@ def outcome_time_series(df, expected_height):
                                                   font=dict(family=cfg.CONTENT_FONT_FAMILY)))
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
-
 def get_population_data(df):
     vals = df.groupby('Species')['Group'].value_counts().sort_index()
     row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
@@ -105,7 +103,6 @@ def population_summary(df, expected_height):
     fig['layout'].update(margin={'b': 150, 'r': 150})
     fig['layout'].update(font=dict(family=cfg.CONTENT_FONT_FAMILY))
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
-
 
 def overall_recommendation(df):
     # Get data
@@ -174,8 +171,17 @@ def get_population_table(df):
         how='right').fillna(value=0)['count']).reshape(2, 4).astype(int)
     rows = []
     rows.append([''] + col_labels)
+    total = 0
+    for zz in z:
+        total += sum(zz)
     for label, zz in zip(row_labels, z):
-        rows.append([label] + list(zz))
+        counts = list(zz)
+        if total > 0:
+            percents = ['{0:0.1f}%'.format(float(x)/total*100) for x in counts]
+        else:
+            percents = ['na' for _ in counts]
+        display_numbers = ['{0} ({1})'.format(c, p) for c, p in zip(counts, percents)]
+        rows.append([label] + display_numbers)
     return utils.html_table(rows)
 
 def get_pop_breakdown(df):
@@ -261,8 +267,18 @@ def population_outcomes_table(df):
     labels = [l.replace('/', '/ ') for l in labels]
     rows = []
     rows.append([''] + labels)
+    total = 0
     for key in stacks:
-        rows.append([key.split('(')[0]] + [int(x) for x in stacks[key]])
+        for x in stacks[key]:
+            total += int(x)
+    for key in stacks:
+        counts = [int(x) for x in stacks[key]]
+        if total > 0:
+            percents = ['{0:0.1f}%'.format(float(x)/total*100) for x in counts]
+        else:
+            percents = ['na' for _ in counts]
+        display_numbers = ['{0} ({1})'.format(c, p) for c, p in zip(counts, percents)]
+        rows.append([key.split('(')[0]] + display_numbers)
     return '<div style="overflow: auto; height: 450px">' + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
 
 def get_cod_breakdown(df):
@@ -295,45 +311,88 @@ def get_cod_breakdown(df):
     labels, _ = utils.resort_outcomes(labels, list(range(len(labels))))
     return labels, stacks, stacks_norm
 
-def population_outcomes_condition_graph(df, expected_height):
-    labels, stacks, stacks_norm = get_cod_breakdown(df)
+def create_outcomes_condition_traces(df, default_visibilty=False):
     traces = []
     traces_norm = []
-    for idx, label in enumerate(labels):
-        traces.append(go.Bar(x=[l.split('(')[0] for l in list(stacks.keys())],
-                            y=np.transpose(list(stacks.values()))[idx],
-                            name=label,
-                            marker=dict(color=cfg.get_outcome_color(label))))
-        traces_norm.append(go.Bar(x=[l.split('(')[0] for l in list(stacks_norm.keys())],
-                            y=np.transpose(list(stacks_norm.values()))[idx],
-                            name=label,
-                            marker=dict(color=cfg.get_outcome_color(label)), visible=False))
-    def getDataVisibile(norm=False):
+
+    if len(df) == 0:
+        labels = [o.title() for o in cfg.OUTCOME_ORDER]
+        for idx, label in enumerate(labels):
+            traces.append(go.Bar(x=[], y=[], name=label, marker=dict(color=cfg.get_outcome_color(label)), visible=default_visibilty))
+            traces_norm.append(go.Bar(x=[], y=[], name=label, marker=dict(color=cfg.get_outcome_color(label)), visible=False))
+    else:
+        labels, stacks, stacks_norm = get_cod_breakdown(df)
+        for idx, label in enumerate(labels):
+            traces.append(go.Bar(x=[l.split('(')[0] for l in list(stacks.keys())],
+                                y=np.transpose(list(stacks.values()))[idx],
+                                name=label,
+                                marker=dict(color=cfg.get_outcome_color(label)), visible=default_visibilty))
+            traces_norm.append(go.Bar(x=[l.split('(')[0] for l in list(stacks_norm.keys())],
+                                y=np.transpose(list(stacks_norm.values()))[idx],
+                                name=label,
+                                marker=dict(color=cfg.get_outcome_color(label)), visible=False))
+    
+    all_traces = traces+traces_norm
+
+    return all_traces
+
+def get_data_visibility(group_number, norm, n_traces, n_traces_per_fascet):
+        vis = [False for _ in range(n_traces)]
         if norm:
-            return [False for _ in traces] + [True for _ in traces_norm]
+            start_idx = group_number*n_traces_per_fascet*2 + n_traces_per_fascet
         else:
-            return [True for _ in traces] + [False for _ in traces_norm]
+            start_idx = group_number*n_traces_per_fascet*2
+        vis[start_idx:start_idx+n_traces_per_fascet] = [True for _ in range(n_traces_per_fascet)]
+        return vis
+
+def population_outcomes_condition_graph(df, expected_height):
+    all_traces = create_outcomes_condition_traces(df, default_visibilty=True)
+    n_traces_per_fascet = int(len(all_traces)/2.)
+    subpops = [
+        [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Cat')],
+
+        [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Dog')]
+    ]
+    for idx, population in enumerate(subpops):
+        subpop_traces = create_outcomes_condition_traces(df[population])
+        all_traces = all_traces + subpop_traces
+    n_traces = len(all_traces)
+    get_vis = lambda grp: get_data_visibility(grp, False, n_traces, n_traces_per_fascet)
+    get_vis_norm = lambda grp: get_data_visibility(grp, True, n_traces, n_traces_per_fascet)
     layout = go.Layout(barmode='stack', title="Raw Outcomes by Condition", margin={'b': 150}, height=expected_height)
-    fig = go.Figure(data=traces+traces_norm, layout=layout)
+    fig = go.Figure(data=all_traces, layout=layout)
     fig['layout'].update(font=dict(family=cfg.CONTENT_FONT_FAMILY))
     fig['layout'].update(updatemenus=list([
                                         dict(
                                             buttons=list([   
-                                                dict(label = 'Raw Numbers',
-                                                    method = 'update',
-                                                    args = [{'visible': getDataVisibile(False)},
-                                                            {'title': 'Raw Outcomes by Condition'}]
-                                                ),
-                                                dict(label = 'Percentages',
-                                                    method = 'update', 
-                                                    args = [{'visible': getDataVisibile(True)},
-                                                            {'title': 'Percent Outcomes by Condition'}]
-                                                ),                    
+                                                dict(label='All', method='update', args=[{'visible': get_vis(0)}]),
+                                                dict(label='% All', method='update', args=[{'visible': get_vis_norm(0)}]),
+                                                dict(label='Neonatal Cats', method='update', args=[{'visible': get_vis(1)}]),
+                                                dict(label='Kitten', method='update', args=[{'visible': get_vis(2)}]),
+                                                dict(label='Adult Cats', method='update', args=[{'visible': get_vis(3)}]),
+                                                dict(label='Senior Cats', method='update', args=[{'visible': get_vis(4)}]),
+                                                dict(label='Neonatal Dogs', method='update', args=[{'visible': get_vis(5)}]),
+                                                dict(label='Puppies', method='update', args=[{'visible': get_vis(6)}]),
+                                                dict(label='Adult Dogs', method='update', args=[{'visible': get_vis(7)}]),
+                                                dict(label='Seniors Dogs', method='update', args=[{'visible': get_vis(8)}]),
+                                                dict(label='% Neonatal', method='update', args=[{'visible': get_vis_norm(1)}]),
+                                                dict(label='% Kitten', method='update', args=[{'visible': get_vis_norm(2)}]),
+                                                dict(label='% Adult Cats', method='update', args=[{'visible': get_vis_norm(3)}]),
+                                                dict(label='% Senior Cats', method='update', args=[{'visible': get_vis_norm(4)}]),
+                                                dict(label='% Neonatal Dogs', method='update', args=[{'visible': get_vis_norm(5)}]),
+                                                dict(label='% Puppies', method='update', args=[{'visible': get_vis_norm(6)}]),
+                                                dict(label='% Adult Dogs', method='update', args=[{'visible': get_vis_norm(7)}]),
+                                                dict(label='% Seniors Dogs', method='update', args=[{'visible': get_vis_norm(8)}]),
                                             ]),
-                                            direction = 'left',
+                                            direction = 'down',
                                             pad = {'r': 10, 't': 10},
                                             showactive = True,
-                                            type = 'buttons',
                                             x = 0.1,
                                             xanchor = 'left',
                                             y = 1.1,
@@ -342,14 +401,52 @@ def population_outcomes_condition_graph(df, expected_height):
                                     ]))
     return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
-def population_outcomes_conditions_table(df):
-    labels, stacks, _ = get_cod_breakdown(df)
+def population_outcomes_conditions_table(df, auto_height=False):
+    if len(df) == 0:
+        labels = [o.title() for o in cfg.OUTCOME_ORDER]
+        stacks = {}
+    else:
+        labels, stacks, _ = get_cod_breakdown(df)
     labels = [l.replace('/', '/ ') for l in labels]
     rows = []
     rows.append([''] + labels)
+    total = 0
     for key in stacks:
-        rows.append([key.split('(')[0]] + [int(x) for x in stacks[key]])
-    return '<div style="overflow: auto; height: 450px">' + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
+        for x in stacks[key]:
+            total += int(x)
+    for key in stacks:
+        counts = [int(x) for x in stacks[key]]
+        if total > 0:
+            percents = ['{0:0.1f}%'.format(float(x)/total*100) for x in counts]
+        else:
+            percents = ['na' for _ in counts]
+        display_numbers = ['{0} ({1})'.format(c, p) for c, p in zip(counts, percents)]
+        rows.append([key.split('(')[0]] + display_numbers)
+    if auto_height:
+        prefix = '<div style="overflow: auto;">'
+    else:
+        prefix = '<div style="overflow: auto; height: 450px">'
+    return prefix + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
+
+def get_subpop_condition_tables(df):
+    subpops = [
+        [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Cat')],
+        [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Cat')],
+
+        [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Dog')],
+        [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Dog')]
+    ]
+    tbls = [population_outcomes_conditions_table(df[pop], auto_height=True) for pop in subpops]
+    header_tempalte = '<h2 class="subheader">{0}</h2>'
+    headers = ['Neonatal Cats', 'Kittens', 'Adult Cats', 'Senior Cats', 'Neonatal Dogs', 'Puppies', 'Adult Dogs', 'Senior Dogs']
+    tables = ''
+    for header, tbl in zip(headers, tbls):
+        tables += header_tempalte.format(header) + tbl + '<hr>'
+    return tables
 
 CONTENT_LUT = {
     '{{plots.outcome_summary}}': [outcome_summary, 650],
@@ -363,4 +460,5 @@ CONTENT_LUT = {
     '{{tables.population_outcomes_conditions}}': [population_outcomes_table, None],
     '{{tables.population_outcomes_conditions_table}}': [population_outcomes_conditions_table, None],
     '{{recommendations.housing}}': [housing_recommendation, None],
+    '{{tables.subpopulation_conditions}}': [get_subpop_condition_tables, None]
 }

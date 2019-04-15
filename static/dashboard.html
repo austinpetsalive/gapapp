@@ -86,8 +86,8 @@
                     margin: 0 auto;
                     /*grid-template-columns: 35% 15% 35% 15%;*/
                     grid-template-columns: 500px 260px 500px 260px;
-                    grid-template-rows: 100px 10px 650px 5px 220px 5px 600px 250px 600px 5px 600px 600px 1200px 50px;
-                    grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Plot Plot Content ContentAnnotation" "Filler2 Filler2 Filler2 Filler2" "Description Description Description DescriptionAnnotation" "Filler3 Filler3 Filler3 Filler3" "Plot2 Plot2 Content2 ContentAnnotation2" "Filler4 Filler4 Filler4 Filler4" "Plot3 Plot3 Content3 ContentAnnotation3" "Filler5 Filler5 Filler5 Filler5" "Plot4 Plot4 Content4 ContentAnnotation4" "Filler6 Filler6 Filler6 Filler6" "Plot5 Plot5 Content5 ContentAnnotation5" "Filler7 Filler7 Filler7 Filler7" "Footer Footer Footer Footer";
+                    grid-template-rows: 100px 10px 650px 5px 220px 5px 600px 250px 600px 5px 600px 600px auto 50px;
+                    grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Plot Plot Content ContentAnnotation" "Filler2 Filler2 Filler2 Filler2" "Description Description Description DescriptionAnnotation" "Filler3 Filler3 Filler3 Filler3" "Plot2 Plot2 Content2 ContentAnnotation2" "Filler4 Filler4 Filler4 Filler4" "Plot3 Plot3 Content3 ContentAnnotation3" "Filler5 Filler5 Filler5 Filler5" "Plot4 Plot4 Content4 ContentAnnotation4" "Filler6 Filler6 Filler6 Filler6" "Plot5 Plot5 Plot5 ContentAnnotation5" "Filler7 Filler7 Filler7 Filler7" "Footer Footer Footer Footer";
                 }
                 table {
                     table-layout: fixed;
@@ -100,8 +100,8 @@
                     margin: 0 auto;
                     /*grid-template-columns: 35% 15% 35% 15%;*/
                     grid-template-columns: 500px 260px 500px 260px;
-                    grid-template-rows: 100px 10px 650px 5px 220px 5px 600px 10px 600px 5px 600px 10px 1200px 50px;
-                    grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Content Content Plot ContentAnnotation" "Filler2 Filler2 Filler2 Filler2" "Description Description Description DescriptionAnnotation" "Filler3 Filler3 Filler3 Filler3" "Plot2 Plot2 Content2 ContentAnnotation2" "Filler4 Filler4 Filler4 Filler4" "Plot3 Plot3 Content3 ContentAnnotation3" "Filler5 Filler5 Filler5 Filler5" "Plot4 Plot4 Content4 ContentAnnotation4" "Filler6 Filler6 Filler6 Filler6" "Plot5 Plot5 Content5 ContentAnnotation5" "Filler7 Filler7 Filler7 Filler7" "Footer Footer Footer Footer";
+                    grid-template-rows: 100px 10px 650px 5px 220px 5px 600px 10px 600px 5px 600px 10px auto 50px;
+                    grid-template-areas: "Header Header Header Header" "Filler Filler Filler Filler" "Content Content Plot ContentAnnotation" "Filler2 Filler2 Filler2 Filler2" "Description Description Description DescriptionAnnotation" "Filler3 Filler3 Filler3 Filler3" "Plot2 Plot2 Content2 ContentAnnotation2" "Filler4 Filler4 Filler4 Filler4" "Plot3 Plot3 Content3 ContentAnnotation3" "Filler5 Filler5 Filler5 Filler5" "Plot4 Plot4 Content4 ContentAnnotation4" "Filler6 Filler6 Filler6 Filler6" "Plot5 Plot5 Plot5 ContentAnnotation5" "Filler7 Filler7 Filler7 Filler7" "Footer Footer Footer Footer";
                 }
             }
 
@@ -222,7 +222,8 @@
 
             .Plot5 { 
                 grid-area: Plot5; 
-                background-color: #97B7C9;
+                background-color: #F2F2F2;
+                padding: 20px;
             }
 
             .ContentAnnotation5 { 
@@ -317,8 +318,6 @@
 
             <div class="Content2 contentvisual">
                 <h2 class="subheader">Overall Population</h2>
-                <p>These are your overall population numbers.</p>
-                <p>It is often helpful to think about what segments of this population you are serving both as a proportion of your whole population and individually.</p>
                 {{tables.population}}
                 {{recommendations.housing}}
             </div>
@@ -340,7 +339,7 @@
             <div class="ContentAnnotation3 annotation">
                     <div class="bubble">
                             <div class="bubblehead">Note</div>
-                            <span class="actiontext">Clicking</span> the buttons in the top left will change the chart display mode from raw numbers to percentages.
+                            <span class="actiontext">Clicking</span> the buttons in the top left will change the chart display mode from raw numbers to percentages. Also, on all plots, <span class="actiontext">clicking the legend</span> will change the visibility of each outcome.
                     </div> 
             </div>
             
@@ -355,7 +354,7 @@
                 <div class="ContentAnnotation4 annotation">
                         <div class="bubble">
                                 <div class="bubblehead">Note</div>
-                                Is there <span class="actiontext">Red</span> in your "Did Not Die" category? This may indicate some data was entered incorrectly (i.e. animals with death outcomes were not given a Condition).
+                                There are a <span class="actiontext">LOT</span> of options in this figure to see all of the different subpopulations. Use the <span class="actiontext">dropdown</span> to select the population, and <span class="actiontext">scroll down</span> to see the raw tables for each.
                         </div> 
                 </div>
                 
@@ -363,12 +362,6 @@
                 <div class="Filler6"></div><div class="Filler6"></div><div class="Filler6"></div><div class="Filler6"></div>
 
             <!-- OUTCOME BY POPULATION SUB-GROUP AREA (1) -->
-            <div class="Content5 contentvisual">
-                    <h2 class="subheader">Detailed Breakdown</h2>
-                    <p></p>
-                    <hr><br>
-                    {{TODO: Detailed Breakdown Table}}
-                </div>
                 <div class="ContentAnnotation5 annotation">
                         <div class="bubble">
                                 <div class="bubblehead">Note</div>
@@ -376,7 +369,7 @@
                         </div> 
                 </div>
                 
-                <div class="Plot5">{{TODO: Detailed Breakdown Figure}}</div>
+                <div class="Plot5">{{tables.subpopulation_conditions}}</div>
                 <div class="Filler7"></div><div class="Filler7"></div><div class="Filler7"></div><div class="Filler7"></div>
                 <div class="Footer">(C) Kevin Horecka and Austin Pets Alive! 2019</div>
         </div>
