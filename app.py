@@ -11,7 +11,7 @@ import os
 import gapapp
 import gapapp.configuration as cfg
 import gapapp.utils as utils
-import gapapp.content as content
+from gapapp.content import ContentRenderer
 from gapapp.sheets import get_sheet_data
 from gapapp.data import save_data_to_file
 
@@ -56,12 +56,15 @@ def make_dash(df):
         dash = fp.read()
     if len(df) > cfg.MAX_DATA_SIZE:
         df = df.sample(n=cfg.MAX_DATA_SIZE)
+    content = ContentRenderer(df)
     for key in content.CONTENT_LUT:
-        logging.info(key)
+        t0 = time.time()
         if content.CONTENT_LUT[key][1]: # Check the required height parameter
-            dash = dash.replace(key, content.CONTENT_LUT[key][0](df, content.CONTENT_LUT[key][1])) # If there is a required height parameter
+            dash = dash.replace(key, content.CONTENT_LUT[key][0](content.CONTENT_LUT[key][1])) # If there is a required height parameter
         else:
-            dash = dash.replace(key, content.CONTENT_LUT[key][0](df)) # If there is no required height parameter
+            dash = dash.replace(key, content.CONTENT_LUT[key][0]()) # If there is no required height parameter
+        delta_t = time.time() - t0
+        logging.info(key + " (t={0})".format(delta_t))
     logging.info('Done')
     with open(local, 'w') as fp:
         fp.write(dash)
