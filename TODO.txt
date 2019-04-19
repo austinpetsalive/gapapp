@@ -16,6 +16,8 @@ Testing
 
 UPDATES
 
+Death/Euthanized -> Euthanized
+
 Source
 Stray/Found
 Owner Surrender
