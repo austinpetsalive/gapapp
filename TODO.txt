@@ -40,3 +40,5 @@ collapse raw outcome numbers for death outcomes on top panel
 change target numbers for 0%s
 
 add disclaimer about data from legal
+
+add length of stay field and associated figure?
