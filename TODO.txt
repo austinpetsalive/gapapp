@@ -27,11 +27,15 @@ Animal Control Pickup
 Over Counter
 Unknown
 
+Change age group to 7 years
+
 Reason for Death
 
 Change housing recommendation to all dogs and make it clear that its is only dogs
 
 change colors for outcomes to be clearer
+
+collapse raw outcome numbers for death outcomes on top panel
 
 change target numbers for 0%s
 
