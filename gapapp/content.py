@@ -17,7 +17,7 @@ import gapapp.configuration as cfg
 class ContentRenderer():
     def __init__(self, df):
         self.CONTENT_LUT = {
-            '{{plots.outcome_summary}}': [self.outcome_summary, 650],
+            '{{plots.outcome_summary}}': [self.outcome_summary, 550],
             '{{recommendations.overall}}': [self.overall_recommendation, None],
             '{{plots.outcome_time_series}}': [self.outcome_time_series, 200],
             '{{plots.population_summary}}': [self.population_summary, 600],
@@ -42,7 +42,20 @@ class ContentRenderer():
     def outcome_summary(self, expected_height):
         # Get data
         labels, values = self.get_outcomes_data()
-
+        labels_merged = []
+        values_merged = []
+        death_value_merged = 0
+        for idx, (l, v) in enumerate(zip(labels, values)):
+            if idx in cfg.OUTCOME_DEATH_INDICIES:
+                death_value_merged += v
+            else:
+                labels_merged.append(l)
+                values_merged.append(v)
+        labels_merged.append('Death')
+        values_merged.append(death_value_merged)
+        labels = labels_merged
+        values = values_merged
+        
         # Get colors
         colors = [cfg.get_outcome_color(outcome) for outcome in labels]
         faded_colors = [utils.desaturate_color(c, 0.5) for c in colors]
@@ -150,6 +163,8 @@ class ContentRenderer():
 
     def housing_recommendation(self):
         df = self.src_df
+        df = df[df['Species'] == 'Dog']
+        df = df[[x or y for x, y in zip(df['Group'] == 'Adult (6 months to 7 years)',  df['Group'] == 'Senior (7 years and older)')]]
         single_ratio = 1.0/25.0
         co_ratio = 1.0/40.0
         intake = pd.to_datetime(df['Intake Date'])
@@ -163,13 +178,23 @@ class ContentRenderer():
         co_housing_extrap = co_housing * year_proportion
         
         recommendation = int(np.ceil(single_housing_extrap*single_ratio + co_housing_extrap*co_ratio))
-        return utils.recommendation_bubble('Housing Recommendation', 'Based on the {0} days of data, {1} single housed, and {2} co-housed animals, we recommend you have {3} kennels at a minimum.'.format(days, single_housing, co_housing, recommendation), 'neutral')
+        return utils.recommendation_bubble('Housing Recommendation', 'Based on the {0} days of data on adult dogs, {1} single housed, and {2} co-housed animals, we recommend you have {3} kennels at a minimum.'.format(days, single_housing, co_housing, recommendation), 'neutral')
 
     def get_outcomes_table(self):
-        df = self.src_df
-        labels = list(df['Outcome'].value_counts().keys())
-        values = list(df['Outcome'].value_counts())
-        labels, values = utils.resort_outcomes(labels, values)
+        labels, values = self.get_outcomes_data()
+        labels_merged = []
+        values_merged = []
+        death_value_merged = 0
+        for idx, (l, v) in enumerate(zip(labels, values)):
+            if idx in cfg.OUTCOME_DEATH_INDICIES:
+                death_value_merged += v
+            else:
+                labels_merged.append(l)
+                values_merged.append(v)
+        labels_merged.append('Death')
+        values_merged.append(death_value_merged)
+        labels = labels_merged
+        values = values_merged
         
         rec = cfg.OUTCOME_RECOMMENDATIONS
         display_percents = ['{0}%'.format(int(x)) for x in np.round(np.array(rec)*100)]
@@ -320,12 +345,12 @@ class ContentRenderer():
         return '<div style="overflow: auto; height: 450px">' + utils.html_table(rows).replace('<table', '<table style="font-size: 12px;"') + '</div>'
 
     def get_cod_breakdown(self, df):
-        z = df.groupby(['Condition and/or Reason for Death', 'Outcome']).size().to_frame('count').reset_index().merge(
-        pd.DataFrame(list(set([i for i in product(*[df['Outcome'], df['Condition and/or Reason for Death']])])), columns=['Outcome', 'Condition and/or Reason for Death']),
-        on=['Condition and/or Reason for Death', 'Outcome'],
+        z = df.groupby(['Reason for Death', 'Outcome']).size().to_frame('count').reset_index().merge(
+        pd.DataFrame(list(set([i for i in product(*[df['Outcome'], df['Reason for Death']])])), columns=['Outcome', 'Reason for Death']),
+        on=['Reason for Death', 'Outcome'],
         how='right').fillna(value=0)
         # z['GroupLabel'] = z['Species'] + ', ' + z['Group']
-        grps = z.groupby(['Condition and/or Reason for Death', 'Outcome'])['count']
+        grps = z.groupby(['Reason for Death', 'Outcome'])['count']
         stacks = {}
         stacks_norm = {}
         labels = []

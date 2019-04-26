@@ -21,19 +21,22 @@ OWNER_REQUEST_EUTHANASIA_COLOR = '#842a1e'
 DIED_IN_CARE_COLOR = '#de7b6e'
 
 def get_outcome_color(outcome_label):
-    return {'adoption': BLUE_SPECUTRUM[0], 
+    return {'death': DEATH_COLOR,
+            'adoption': BLUE_SPECUTRUM[0], 
             'return to owner': BLUE_SPECUTRUM[3], 
             'transfer out': BLUE_SPECUTRUM[6], 
             'lost/stolen': BLUE_SPECUTRUM[9],
-            'death/euthanized': DEATH_COLOR, 
+            'euthanized': DEATH_COLOR, 
             'owner requested euthanasia': OWNER_REQUEST_EUTHANASIA_COLOR,
             'died in care': DIED_IN_CARE_COLOR}[outcome_label.lower()]
 
 CONTENT_FONT_FAMILY = 'Source Sans Pro, sans-serif'
 
-OUTCOME_ORDER = ['died in care', 'death/euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
+OUTCOME_ORDER = ['died in care', 'euthanized', 'owner requested euthanasia', 'lost/stolen', 'transfer out', 'return to owner', 'adoption']
 OUTCOME_DEATH_INDICIES = [0, 1, 2]
-OUTCOME_RECOMMENDATIONS = [0, 0.05, 0, 0, .30, .20, .45]
+OUTCOME_RECOMMENDATIONS = [0.01, .30, .20, .44, 0.05]
+assert sum(OUTCOME_RECOMMENDATIONS) == 1.0, \
+    "there was a problem loading the configuration, the sum of the recommended outcomes was not 1 (sum={0})".format(sum(OUTCOME_RECOMMENDATIONS))
 
 DASHBOARD_LOCAL_SAVE_PATH = './static/dashboards/'
 DASHBOARD_SERVER_SAVE_PATH = '/static/dashboards/'

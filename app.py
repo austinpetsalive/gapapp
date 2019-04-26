@@ -40,6 +40,7 @@ def hello():
         logging.info(URL)
         data = get_sheet_data(URL)
         df = pd.DataFrame(data[1:], columns=data[0])
+        logging.info(df.columns)
         save_data_to_file(df, email)
         logging.debug(df)
 

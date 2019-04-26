@@ -21,7 +21,7 @@ def get_sheet_data(URL):
     # The ID and range of a sample spreadsheet.
     #SAMPLE_SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
     SAMPLE_SPREADSHEET_ID = URL.replace('https://docs.google.com/spreadsheets/d/', '').split('/')[0]
-    SAMPLE_RANGE_NAME = 'A:H'
+    SAMPLE_RANGE_NAME = 'A:J'
 
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is

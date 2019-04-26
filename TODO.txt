@@ -2,43 +2,15 @@ New Features/Major Changes
 = Redo front page visuals
 = Determine final contact/demographic field requirements
 = Add "test data" switch for required fields
+= Optimize colors based on feedback
 
 Optimizations
 = Optimize queries for more data (up to 100k preferrably)
 
 Documentation
 = Make data conversion tutorial
+= Get better legal text
 
 Testing
 = Regenerate APA data set with correct condition fields
 = Pass test with all APA data
-
-
-UPDATES
-
-Death/Euthanized -> Euthanized
-
-Source
-Stray/Found
-Owner Surrender
-
-Intake Type
-Animal Control Pickup
-Over Counter
-Unknown
-
-Change age group to 7 years
-
-Reason for Death
-
-Change housing recommendation to all dogs and make it clear that its is only dogs
-
-change colors for outcomes to be clearer
-
-collapse raw outcome numbers for death outcomes on top panel
-
-change target numbers for 0%s
-
-add disclaimer about data from legal
-
-add length of stay field and associated figure?
