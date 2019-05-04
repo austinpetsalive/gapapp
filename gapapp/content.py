@@ -108,15 +108,29 @@ class ContentRenderer():
                                                     font=dict(family=cfg.CONTENT_FONT_FAMILY)))
         return plot(fig, auto_open=False, output_type='div', include_mathjax=False, include_plotlyjs=False)
 
-    def get_population_data(self):
+    def get_species_group_counts(self):
         df = self.src_df
-        vals = df.groupby('Species')['Group'].value_counts().sort_index()
-        row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
-        z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
-            pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
-            on=['Species', 'Group'],
-            how='right').fillna(value=0)['count']).reshape(2, 4)
-        return row_labels, col_labels, z
+        species_values = ['Dog', 'Cat']
+        group_values = ['Neonatal (less than 6 weeks)', 'Puppies/Kittens (6 weeks to 6 months)', 'Adult (6 months to 7 years)', 'Senior (7 years and older)']
+        combinations = product(species_values, group_values)
+        species, groups, count = [], [], []
+        for s, g in combinations:
+            ss, gg = df['Species'] == s, df['Group'] == g
+            species.append(s)
+            groups.append(g)
+            count.append(float([a and b for a, b in zip(ss, gg)].count(True)))
+        return species_values, group_values, np.array(count).reshape(2, 4)
+
+    def get_population_data(self):
+        #df = self.src_df
+        #vals = df.groupby('Species')['Group'].value_counts().sort_index()
+        #row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
+        #z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
+        #    pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
+        #    on=['Species', 'Group'],
+        #    how='right').fillna(value=0)['count']).reshape(2, 4)
+        return self.get_species_group_counts()
+        #return row_labels, col_labels, z
 
     def population_summary(self, expected_height):
         df = self.src_df
@@ -172,9 +186,9 @@ class ContentRenderer():
         max_date = max(intake)
         days = float((max_date - min_date).days)
         year_proportion = 365.25/days
-        single_housing = (df['Housing Need'] == 'Single Unit Housing').count()
+        single_housing = np.array((df['Housing Need'] == 'Single Unit Housing')).sum()
         single_housing_extrap = single_housing * year_proportion
-        co_housing = (df['Housing Need'] == 'Co-Housing').count()
+        co_housing = np.array((df['Housing Need'] == 'Co-Housing')).sum()
         co_housing_extrap = co_housing * year_proportion
         
         recommendation = int(np.ceil(single_housing_extrap*single_ratio + co_housing_extrap*co_ratio))
@@ -212,14 +226,15 @@ class ContentRenderer():
         return utils.html_table(rows)
 
     def get_population_table(self):
-        df = self.src_df
-        vals = df.groupby('Species')['Group'].value_counts().sort_index()
-        row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
+        # df = self.src_df
+        # vals = df.groupby('Species')['Group'].value_counts().sort_index()
+        # row_labels, col_labels = [x.tolist() for x in vals.keys().levels]
         
-        z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
-            pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
-            on=['Species', 'Group'],
-            how='right').fillna(value=0)['count']).reshape(2, 4).astype(int)
+        # z = np.array(df.groupby(['Species','Group']).size().to_frame('count').reset_index().merge(
+        #     pd.DataFrame(list(set([i for i in product(*[df.Group, df.Species])])), columns=['Group', 'Species']),
+        #     on=['Species', 'Group'],
+        #     how='right').fillna(value=0)['count']).reshape(2, 4).astype(int)
+        row_labels, col_labels, z = self.get_population_data()
         rows = []
         rows.append([''] + col_labels)
         total = 0
@@ -243,8 +258,8 @@ class ContentRenderer():
         # how='right').fillna(value=0)
         # z['GroupLabel'] = z['Species'] + ', ' + z['Group']
         species_values = ['Dog', 'Cat']
-        group_values = ['Neonatal (less than 6 weeks)', 'Puppies/Kittens (6 weeks to 6 months)', 'Adult (6 months to 12 years)', 'Senior (12 years and older)']
-        outcome_values = ['Died in Care', 'Death/Euthanized', 'Owner Requested Euthanasia', 'Lost/Stolen', 'Transfer Out', 'Return to Owner', 'Adoption']
+        group_values = ['Neonatal (less than 6 weeks)', 'Puppies/Kittens (6 weeks to 6 months)', 'Adult (6 months to 7 years)', 'Senior (7 years and older)']
+        outcome_values = ['Died in Care', 'Euthanized', 'Owner Requested Euthanasia', 'Lost/Stolen', 'Transfer Out', 'Return to Owner', 'Adoption']
         combinations = product(species_values, group_values, outcome_values)
         outcomes, count, grouplabels = [], [], []
         for s, g, o in combinations:
@@ -416,13 +431,13 @@ class ContentRenderer():
         subpops = [
             [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Cat')],
             [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Cat')],
-            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Cat')],
-            [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Cat')],
+            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 7 years)', df['Species'] == 'Cat')],
+            [x and y for x, y in zip(df['Group'] == 'Senior (7 years and older)', df['Species'] == 'Cat')],
 
             [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Dog')],
             [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Dog')],
-            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Dog')],
-            [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Dog')]
+            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 7 years)', df['Species'] == 'Dog')],
+            [x and y for x, y in zip(df['Group'] == 'Senior (7 years and older)', df['Species'] == 'Dog')]
         ]
         for population in subpops:
             subpop_traces = self.create_outcomes_condition_traces(df[population])
@@ -501,13 +516,13 @@ class ContentRenderer():
         subpops = [
             [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Cat')],
             [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Cat')],
-            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Cat')],
-            [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Cat')],
+            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 7 years)', df['Species'] == 'Cat')],
+            [x and y for x, y in zip(df['Group'] == 'Senior (7 years and older)', df['Species'] == 'Cat')],
 
             [x and y for x, y in zip(df['Group'] == 'Neonatal (less than 6 weeks)', df['Species'] == 'Dog')],
             [x and y for x, y in zip(df['Group'] == 'Puppies/Kittens (6 weeks to 6 months)', df['Species'] == 'Dog')],
-            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 12 years)', df['Species'] == 'Dog')],
-            [x and y for x, y in zip(df['Group'] == 'Senior (12 years and older)', df['Species'] == 'Dog')]
+            [x and y for x, y in zip(df['Group'] == 'Adult (6 months to 7 years)', df['Species'] == 'Dog')],
+            [x and y for x, y in zip(df['Group'] == 'Senior (7 years and older)', df['Species'] == 'Dog')]
         ]
         tbls = [self.population_outcomes_conditions_table(df[pop], auto_height=True) for pop in subpops]
         header_tempalte = '<h2 class="subheader">{0}</h2>'
