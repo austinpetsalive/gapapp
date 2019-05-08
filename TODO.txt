@@ -1,3 +1,9 @@
+Bugs
+= Rescale bars on zoom
+= Sort tables in same order as bars
+= Dates are out of order
+= Remove "default" or "unknown" values from plots
+
 New Features/Major Changes
 = Redo front page visuals
 = Determine final contact/demographic field requirements
