@@ -4,6 +4,12 @@ Bugs
 = Dates are out of order
 = Remove "default" or "unknown" values from plots
 
+Branding
+= Use the stacked/square logo on the log-in page and the horizontal logo on the header of the dashboard
+= Adjust style to AMPA_Style_Guide.pdf
+
+If we can add AmPA! into file names, like the excel template, that would be great. I would also add that to the title of the dashboard. Lastly, if it's possible to change the URL to americanpetsalive, rather than austinpetsalive (would be https://github.com/americanpetsalive/gapapp) that would be good. 
+
 New Features/Major Changes
 = Redo front page visuals
 = Determine final contact/demographic field requirements
